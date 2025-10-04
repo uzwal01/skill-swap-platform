@@ -2,6 +2,14 @@ import { Request, Response } from "express";
 import { User } from "../models/User";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { AuthRequest } from "../middlewares/auth.middleware";
+
+
+
+
+export const getMe = (req: AuthRequest, res: Response) => {
+    res.json(req.user);   // req.user is set by the middleware
+}
 
 // Register User
 export const registerUser = async (req: Request, res: Response) => {
