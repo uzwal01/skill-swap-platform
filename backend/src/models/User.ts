@@ -42,5 +42,13 @@ const UserSchema = new Schema<IUser>(
     { timestamps: true }
 );
 
+// Hide the Password keyword while displaying json responses
+UserSchema.set('toJSON', {
+    transform: function(doc, ret: any) {
+        delete ret.password;
+        return ret;
+    }
+})
+
 
 export const User = mongoose.model<IUser>('User', UserSchema);
