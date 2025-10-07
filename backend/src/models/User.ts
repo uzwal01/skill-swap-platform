@@ -42,7 +42,7 @@ const UserSchema = new Schema<IUser>(
     { timestamps: true }
 );
 
-// Hide the Password keyword while displaying json responses
+// remove password field from API responses for user objects
 UserSchema.set('toJSON', {
     transform: function(doc, ret: any) {
         delete ret.password;

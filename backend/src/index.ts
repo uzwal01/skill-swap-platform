@@ -5,6 +5,10 @@ import { connectDB } from './config/db';
 import authRoutes from './routes/v1/auth.routes';
 import userRoutes from './routes/v1/users.routes';
 import matchRoutes from './routes/v1/matches.routes';
+import sessionRoutes from './routes/v1/session.routes';
+
+
+
 
 dotenv.config();
 
@@ -14,8 +18,6 @@ connectDB();        // Connect to MongoDB
 // Middleware
 app.use(cors());
 app.use(express.json());
-
-
 
 
 
@@ -34,6 +36,15 @@ app.use('/api/v1/users', userRoutes);
 
 // matches
 app.use('/api/v1/matches', matchRoutes);
+
+// Sessions: Create, Get and UpdateStatus
+app.use('/api/v1/sessions', sessionRoutes);
+
+
+
+
+
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
