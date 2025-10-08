@@ -5,8 +5,9 @@ export interface ISession extends Document {
     toUser: mongoose.Types.ObjectId;
     fromUserSkill: string;  // What I can teach
     toUserSkill: string;    // What I want to learn
-    status: 'pending' | 'accepted' | 'rejected';
+    status: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'completed';
     scheduledAt?: Date;
+    completedAt?: Date;
 }
 
 
@@ -16,8 +17,9 @@ const sessionSchema = new Schema<ISession>(
         toUser: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         fromUserSkill: { type: String, required: true },
         toUserSkill: { type: String, required: true },
-        status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+        status: { type: String, enum: ['pending', 'accepted', 'rejected', 'cancelled', 'completed'], default: 'pending' },
         scheduledAt: { type: Date },
+        completedAt: { type: Date },
     },
     { timestamps: true }
 );
