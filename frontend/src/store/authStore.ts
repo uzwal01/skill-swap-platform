@@ -1,29 +1,29 @@
-// import { create } from 'zustand';
-// import { LoginFormData, RegisterFormData } from '@/types/FormData';
-// // import { User } from '@/types/User';
-// // import { loginUser, registerUser, getCurrentUser } from '@/services/authService';
+import { create } from 'zustand';
+import { loginUser, registerUser, getCurrentuser } from '@/services/authService';  
+import { LoginFormData, RegisterFormData } from '@/types/FormData'; 
+import { User } from '@/types/User';
 
-// type AuthState = {
-//   user: User | null;  // User can be null if not authenticated
-//   setUser: (user: User) => void;
-//   login: (data: LoginFormData) => Promise<void>;
-//   register: (data: RegisterFormData) => Promise<void>;
-//   fetchUser: () => Promise<void>;
-// };
+type AuthState = {
+  user: User | null;  // Will hold the authenticated user data
+  setUser: (user: User) => void;  // Action to set the user
+  login: (data: LoginFormData) => Promise<void>;  // Login action
+  register: (data: RegisterFormData) => Promise<void>;  // Register action
+  fetchUser: () => Promise<void>;  // Fetch user data from the backend
+};
 
-// export const useAuthStore = create<AuthState>((set) => ({
-//   user: null,
-//   setUser: (user) => set({ user }),
-//   login: async (data) => {
-//     const res = await loginUser(data);
-//     set({ user: res.user });
-//   },
-//   register: async (data) => {
-//     const res = await registerUser(data);
-//     set({ user: res.user });
-//   },
-//   fetchUser: async () => {
-//     const res = await getCurrentUser();
-//     set({ user: res.user });
-//   },
-// }));
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,  // Default value for user (not logged in)
+  setUser: (user) => set({ user }),  // Update the user state
+  login: async (data) => {
+    const res = await loginUser(data);  // Call the login service
+    set({ user: res.user });  // Store the user data in global state
+  },
+  register: async (data) => {
+    const res = await registerUser(data);  // Call the register service
+    set({ user: res.user });  // Store the user data in global state
+  },
+  fetchUser: async () => {
+    const res = await getCurrentuser();  // Fetch current logged-in user
+    set({ user: res.user });  // Store the user data in global state
+  },
+}));
