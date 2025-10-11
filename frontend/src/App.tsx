@@ -1,9 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home'; // Home page
-import Login from './pages/Login'; // Login page
-import Register from './pages/Register'; // Register page
-// import Dashboard from './pages/Dashboard'; // Dashboard page
-// import PrivateRoute from './components/PrivateRoute'; // Protect private routes
+import Home from './pages/Home'; 
+import Login from './pages/Login'; 
+import Register from './pages/Register'; 
+import PrivateRoute from './components/PrivateRoute'; // Protect private routes
+import Dashboard from './pages/Dashboard';
 
 const App = () => {
   return (
@@ -14,12 +14,12 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Private Route
+        Private Route
         <Route path="/dashboard" element={
           <PrivateRoute>
             <Dashboard />
           </PrivateRoute>
-        } /> */}
+        } />
       </Routes>
     </div>
   );

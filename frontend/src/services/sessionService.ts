@@ -8,6 +8,11 @@ export const createSession = async (data: Session): Promise<Session> => {
     return response.data;
 };
 
+// Get user sessions
+export const getUserSessions = async (userId: string): Promise<Session[]> => {
+    const response = await api.get(`/sessions/my?userId=${userId}`);
+    return response.data;
+}
 
 // Update Session status
 export const updateSessionStatus = async (sessionId: string, status: string): Promise<Session> => {

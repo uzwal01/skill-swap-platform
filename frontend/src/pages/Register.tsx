@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RegisterFormData } from '@/types/FormData'; // Import the type
 import { registerSchema } from '@/schemas/registerSchema';
+import { registerUser } from '@/services/authService';
 
 const Register = () => {
   // Initialize form with react-hook-form
@@ -13,7 +14,12 @@ const Register = () => {
   const onSubmit = async (data: RegisterFormData) => {
     console.log(data);
     // Call your API for registration (use Zustand store or API calls)
-    // Example: await registerUser(data.name, data.email, data.password);
+    try {
+    await registerUser(data);  // Zustand store action
+    console.log('Registration successful'); // <-- Add this for debug
+  } catch (err) {
+    console.error('Registration error', err);
+  }
   };
 
   return (
