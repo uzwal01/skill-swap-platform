@@ -87,4 +87,20 @@ export const loginUser = async (req: Request, res: Response) => {
         console.error('Login Error:', err);
         res.status(500).json({ message: 'Internal Server Error' });
     }
-}
+};
+
+
+// Get Current User
+export const getCurrentUser = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const user = await User.findById(userId).select('-password'); // exclude password
+    res.json({ user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
