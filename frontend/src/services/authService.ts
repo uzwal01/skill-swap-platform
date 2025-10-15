@@ -1,8 +1,8 @@
 import api from "@/lib/api.ts";
-import { LoginFormData, RegisterFormData } from "@/types/FormData.ts";
+import { LoginFormData, RegisterPayload } from "@/types/FormData.ts";
 
 // Register API call
-export const registerUser = async (data: RegisterFormData) => {
+export const registerUser = async (data: RegisterPayload) => {
     const response = await api.post('/auth/register', data);
     return response.data;
 };

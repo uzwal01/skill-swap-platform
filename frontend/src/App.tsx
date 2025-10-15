@@ -4,8 +4,16 @@ import Login from './pages/Login';
 import Register from './pages/Register'; 
 import PrivateRoute from './components/PrivateRoute'; // Protect private routes
 import Dashboard from './pages/Dashboard';
+import { useAuthStore } from './store/authStore';
+import { useEffect } from 'react';
 
 const App = () => {
+const fetchUser = useAuthStore((state) => state.fetchUser);
+
+useEffect(() => {
+  fetchUser();
+}, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Routes>
@@ -14,7 +22,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        Private Route
+        {/* Private Route */}
         <Route path="/dashboard" element={
           <PrivateRoute>
             <Dashboard />

@@ -20,11 +20,11 @@ useEffect(() => {
         setLoading(true);
         try {
             // Fetch mutual matches for the user
-            const matchesData: Match[] = await getMutualMatches(user.id);
+            const matchesData: Match[] = await getMutualMatches();
             setMatches(matchesData);
 
             // Fetch sessions for the user
-            const sessionsData: Session[] = await getUserSessions(user.id);
+            const sessionsData: Session[] = await getUserSessions();
             setSessions(sessionsData);
 
         } catch (err) {
@@ -45,14 +45,25 @@ return (
 
         {/* Matches Section */}
         <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Yout Skill Matches</h2>
+            <h2 className="text-2xl font-semibold mb-4">Your Skill Matches</h2>
             {matches.length === 0 ? (
                 <p>No matches found.</p>
             ) : (
                 <ul className="space-y-2">
                     {matches.map((match) => (
-                        <li key={match.userId} className="p-4 border rounded shadow-sm">
-                            {match.skill} with {match.matchedWith} (Score: {match.matchScore})
+                        <li key={match._id} className="p-4 border rounded shadow-sm">
+                            <h3 className="font-semibold">{match.name}</h3>
+                            <p className="text-sm text-gray-600">{match.email}</p>
+                            <div className="mt-2">
+                                <p className="text-sm">
+                                    <span className="font-medium">Can teach:</span>{" "}
+                                    {match.skillsOffered.map((s) => s.skill).join(", ")}
+                                </p>
+                                <p className="text-sm">
+                                    <span className="font-medium">Wants to learn:</span>{" "}
+                                    {match.skillsWanted.map((s) => s.skill).join(", ")}
+                                </p>
+                            </div>
                         </li>
                     ))}
                 </ul>
@@ -67,13 +78,13 @@ return (
         ) : (
           <ul className="space-y-2">
             {sessions.map((session) => (
-              <li key={session.sessionId} className="p-4 border rounded shadow-sm">
-                Session with {session.toUser} - Status: {session.status}
+              <li key={session._id} className="p-4 border rounded shadow-sm">
+                Session with {session.toUser.name} - Status: {session.status}
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </section> 
     </div>
 )
 

@@ -1,6 +1,16 @@
+export type Skill = {
+    category: string;
+    skill: string;
+}
+
+
 export type User = {
-    id: string;
+    _id: string;
     name: string;
     email: string;
-    token: string;  // JWT token if backend sends one
+    bio?: string;
+    avatarUrl?: string;
+    skillsOffered: Skill[];
+    skillsWanted: Skill[];
+    createdAt?: string;
 };

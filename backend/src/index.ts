@@ -16,7 +16,11 @@ const app = express();
 connectDB();        // Connect to MongoDB
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // Frontend URL 
+    credentials: true,  // allows cookies / JWT to be sent
+}));
+
 app.use(express.json());
 
 

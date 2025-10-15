@@ -1,29 +1,80 @@
 import { create } from 'zustand';
 import { loginUser, registerUser, getCurrentuser } from '@/services/authService';  
-import { LoginFormData, RegisterFormData } from '@/types/FormData'; 
+import { LoginFormData, RegisterPayload } from '@/types/FormData'; 
 import { User } from '@/types/User';
 
 type AuthState = {
   user: User | null;  // Will hold the authenticated user data
+  isLoading: boolean;
+  error: string | null;
   setUser: (user: User) => void;  // Action to set the user
   login: (data: LoginFormData) => Promise<void>;  // Login action
-  register: (data: RegisterFormData) => Promise<void>;  // Register action
+  register: (payload: RegisterPayload) => Promise<void>;  // Register action
   fetchUser: () => Promise<void>;  // Fetch user data from the backend
+  logout: () => void;  // Logout user
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,  // Default value for user (not logged in)
+  user: null,
+  isLoading: false,
+  error: null,
+
+ // Default value for user (not logged in)
   setUser: (user) => set({ user }),  // Update the user state
+
   login: async (data) => {
-    const res = await loginUser(data);  // Call the login service
+    try {
+      const res = await loginUser(data);  // Call the login service
+    localStorage.setItem('token', res.token);   // Save the token
     set({ user: res.user });  // Store the user data in global state
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+          set({ error: err.message });
+        }
+        else {
+          
+          set({ error: "Login failed"});
+        }
+    } finally {
+      set({ isLoading: false});
+    }
+    
   },
-  register: async (data) => {
-    const res = await registerUser(data);  // Call the register service
-    set({ user: res.user });  // Store the user data in global state
-  },
+  register: async (data: RegisterPayload) => {
+  set({ isLoading: true, error: null });
+  try {
+    const res = await registerUser(data);
+    localStorage.setItem("token", res.token);
+    set({ user: res.user, error: null });
+  } catch (err: unknown) {
+    if (err instanceof Error) set({ error: err.message });
+    else set({ error: "Registration failed" });
+  } finally {
+    set({ isLoading: false });
+  }
+},
+
   fetchUser: async () => {
-    const res = await getCurrentuser();  // Fetch current logged-in user
-    set({ user: res.user });  // Store the user data in global state
+    const token = localStorage.getItem("token");
+    if (!token) return;     // Don’t call API if no token
+    set({ isLoading: true, error: null });
+    try {
+      const res = await getCurrentuser();
+      set({ user: res.user });
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+          set({ error: err.message });
+        }
+        else {
+          
+          set({ error: "Failed to fetch user"});
+        }
+    } finally {
+      set({ isLoading: false });
+    }
   },
+  logout: async () => {
+    localStorage.removeItem('token');   // Remove token from localStorage
+    set({ user: null });   // Clear user from Global State
+  }
 }));
