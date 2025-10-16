@@ -1,18 +1,24 @@
-
 import api from "@/lib/api";
-import { UserProfile } from "@/types/UserProfile";
+import { User } from "@/types/User";
 
+// Payload for updating current user profile
+export type UpdateProfilePayload = Partial<Pick<
+  User,
+  "name" | "bio" | "avatarUrl" | "skillsOffered" | "skillsWanted"
+>>;
 
-
-// Fetch user profile
-export const getUserProfile = async (): Promise<UserProfile> => {
-    const response = await api.get('/users/profile');
-    return response.data;  // This will be of type UserProfile
+// Fetch current user's profile
+export const getMyProfile = async (): Promise<User> => {
+  const response = await api.get("/users/me");
+  const data = response.data;
+  // BE may return either the user directly or { user }
+  return (data && data.user ? data.user : data) as User;
 };
 
-
-// Update user profile
-export const updateUserProfile = async (data: UserProfile): Promise<UserProfile> => {
-    const response = await api.put('/users/profile', data);
-    return response.data;   // This will be of type UserProfile
+// Update current user's profile
+export const updateProfile = async (
+  data: UpdateProfilePayload
+): Promise<User> => {
+  const response = await api.put("/users/me", data);
+  return response.data.user as User;
 };

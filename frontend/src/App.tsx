@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register'; 
 import PrivateRoute from './components/PrivateRoute'; // Protect private routes
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
 import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
 
@@ -27,6 +28,11 @@ useEffect(() => {
         <Route path="/dashboard" element={
           <PrivateRoute>
             <Dashboard />
+          </PrivateRoute>
+        } />
+        <Route path="/profile" element={
+          <PrivateRoute>
+            <Profile />
           </PrivateRoute>
         } />
       </Routes>
