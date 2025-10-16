@@ -12,7 +12,8 @@ const fetchUser = useAuthStore((state) => state.fetchUser);
 
 useEffect(() => {
   fetchUser();
-}, []);
+  // run once on mount to restore session from token
+}, [fetchUser]);
 
   return (
     <div className="min-h-screen bg-gray-50">

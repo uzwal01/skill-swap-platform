@@ -23,22 +23,20 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) => set({ user }),  // Update the user state
 
   login: async (data) => {
+    set({ isLoading: true, error: null });
     try {
       const res = await loginUser(data);  // Call the login service
-    localStorage.setItem('token', res.token);   // Save the token
-    set({ user: res.user });  // Store the user data in global state
+      localStorage.setItem('token', res.token);   // Save the token
+      set({ user: res.user, error: null });  // Store the user data in global state
     } catch (err: unknown) {
-        if (err instanceof Error) {
-          set({ error: err.message });
-        }
-        else {
-          
-          set({ error: "Login failed"});
-        }
+      if (err instanceof Error) {
+        set({ error: err.message });
+      } else {
+        set({ error: "Login failed"});
+      }
     } finally {
       set({ isLoading: false});
     }
-    
   },
   register: async (data: RegisterPayload) => {
   set({ isLoading: true, error: null });

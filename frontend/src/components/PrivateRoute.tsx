@@ -7,17 +7,18 @@ interface PrivateRouteProps {
     children: React.ReactElement;  // Child component that needs protection
 }
 
-
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-    const user = useAuthStore((state) => state.user);
+  const { user, isLoading } = useAuthStore((s) => ({ user: s.user, isLoading: s.isLoading }));
 
-    if (!user) {
-        // If user is not logged in, redirect to login page
-        return <Navigate to="/login" replace />;
-    }
+  if (isLoading) {
+    return <div className="p-6 text-center">Checking session…</div>;
+  }
 
-    // If logged in, render the protected component
-    return children;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 };
 
 export default PrivateRoute;

@@ -1,9 +1,10 @@
 import { getMutualMatches } from "@/services/matchService";
-import { getUserSessions } from "@/services/sessionService";
+import { createSession, getUserSessions, updateSessionStatus } from "@/services/sessionService";
 import { useAuthStore } from "@/store/authStore";
 import { Match } from "@/types/Match";
 import { Session } from "@/types/Session";
 import React, { useEffect, useState } from "react";
+import SessionRequestModel from "@/components/SessionRequestModel";
 
 
 
@@ -12,6 +13,9 @@ const user = useAuthStore((state) => state.user);   // Get logged in user
 const [matches, setMatches] = useState<Match[]>([]);
 const [sessions, setSessions] = useState<Session[]>([]);
 const [loading, setLoading] = useState(true);
+const [busy, setBusy] = useState<string | null>(null);
+const [requestOpen, setRequestOpen] = useState(false);
+const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
 useEffect(() => {
     if (!user) return;
@@ -64,6 +68,12 @@ return (
                                     {match.skillsWanted.map((s) => s.skill).join(", ")}
                                 </p>
                             </div>
+                            <button
+                              className="mt-3 rounded bg-blue-600 px-3 py-1 text-white"
+                              onClick={() => { setSelectedMatch(match); setRequestOpen(true); }}
+                            >
+                              Request Session
+                            </button>
                         </li>
                     ))}
                 </ul>
@@ -77,14 +87,105 @@ return (
           <p>No sessions found.</p>
         ) : (
           <ul className="space-y-2">
-            {sessions.map((session) => (
+            {sessions.map((session) => {
+              const partner = user && session.fromUser._id === user._id ? session.toUser : session.fromUser;
+              return (
               <li key={session._id} className="p-4 border rounded shadow-sm">
-                Session with {session.toUser.name} - Status: {session.status}
+                Session with {partner.name} - Status: {session.status}
+                <div className="mt-2 flex gap-2">
+                  {user && session.status === 'pending' && session.toUser._id === user._id && (
+                    <>
+                      <button
+                        className="rounded bg-green-600 px-3 py-1 text-white disabled:opacity-50"
+                        disabled={busy === session._id}
+                        onClick={async () => {
+                          setBusy(session._id);
+                          try {
+                            await updateSessionStatus(session._id, 'accepted');
+                            const data = await getUserSessions();
+                            setSessions(data);
+                          } finally {
+                            setBusy(null);
+                          }
+                        }}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
+                        disabled={busy === session._id}
+                        onClick={async () => {
+                          setBusy(session._id);
+                          try {
+                            await updateSessionStatus(session._id, 'rejected');
+                            const data = await getUserSessions();
+                            setSessions(data);
+                          } finally {
+                            setBusy(null);
+                          }
+                        }}
+                      >
+                        Reject
+                      </button>
+                    </>
+                  )}
+
+                  {user && session.status === 'pending' && session.fromUser._id === user._id && (
+                    <button
+                      className="rounded bg-gray-600 px-3 py-1 text-white disabled:opacity-50"
+                      disabled={busy === session._id}
+                      onClick={async () => {
+                        setBusy(session._id);
+                        try {
+                          await updateSessionStatus(session._id, 'cancelled');
+                          const data = await getUserSessions();
+                          setSessions(data);
+                        } finally {
+                          setBusy(null);
+                        }
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  )}
+
+                  {user && session.status === 'accepted' && (session.fromUser._id === user._id || session.toUser._id === user._id) && (
+                    <button
+                      className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
+                      disabled={busy === session._id}
+                      onClick={async () => {
+                        setBusy(session._id);
+                        try {
+                          await updateSessionStatus(session._id, 'completed');
+                          const data = await getUserSessions();
+                          setSessions(data);
+                        } finally {
+                          setBusy(null);
+                        }
+                      }}
+                    >
+                      Complete
+                    </button>
+                  )}
+                </div>
               </li>
-            ))}
+            );})}
           </ul>
         )}
       </section> 
+      {requestOpen && selectedMatch && (
+        <SessionRequestModel
+          open={requestOpen}
+          match={selectedMatch}
+          onClose={() => setRequestOpen(false)}
+          onSubmit={async (data) => {
+            await createSession(data);
+            const sessionsData: Session[] = await getUserSessions();
+            setSessions(sessionsData);
+            setRequestOpen(false);
+          }}
+        />
+      )}
     </div>
 )
 
