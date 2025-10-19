@@ -16,16 +16,20 @@ export const registerUser = async (req: Request, res: Response) => {
     try {
         const { name, email, password, skillsOffered, skillsWanted } = req.body;
 
-        const userExists = await User.findOne({ email });
+        const emailNorm = String(email || '').trim().toLowerCase();
+        const passwordTrim = String(password || '').trim();
+        const nameTrim = String(name || '').trim();
+
+        const userExists = await User.findOne({ email: emailNorm });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(passwordTrim, 10);
 
         const newUser = await User.create({
-            name,
-            email,
+            name: nameTrim,
+            email: emailNorm,
             password: hashedPassword,
             skillsOffered,
             skillsWanted,
@@ -58,12 +62,15 @@ export const loginUser = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        const emailNorm = String(email || '').trim().toLowerCase();
+        const passwordTrim = String(password || '').trim();
+
+        const user = await User.findOne({ email: emailNorm });
         if(!user) {
             return res.status(400).json({ message: 'Invalid email or password'});
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(passwordTrim, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid email or password' });
         }

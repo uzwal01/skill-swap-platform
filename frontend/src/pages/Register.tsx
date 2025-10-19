@@ -35,10 +35,10 @@ const Register = () => {
     const skillsWanted = parseSkills(data.skillsWantedInput || "");
 
     const payload: RegisterPayload = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      confirmPassword: data.confirmPassword,
+      name: data.name.trim(),
+      email: data.email.trim().toLowerCase(),
+      password: data.password.trim(),
+      confirmPassword: data.confirmPassword.trim(),
       skillsOffered,
       skillsWanted,
     };

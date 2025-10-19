@@ -8,8 +8,8 @@ type AuthState = {
   isLoading: boolean;
   error: string | null;
   setUser: (user: User) => void;  // Action to set the user
-  login: (data: LoginFormData) => Promise<void>;  // Login action
-  register: (payload: RegisterPayload) => Promise<void>;  // Register action
+  login: (data: LoginFormData) => Promise<void>;  // Login action (throws on failure)
+  register: (payload: RegisterPayload) => Promise<void>;  // Register action (throws on failure)
   fetchUser: () => Promise<void>;  // Fetch user data from the backend
   logout: () => void;  // Logout user
 };
@@ -29,11 +29,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', res.token);   // Save the token
       set({ user: res.user, error: null });  // Store the user data in global state
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        set({ error: err.message });
-      } else {
-        set({ error: "Login failed"});
-      }
+      const message = err instanceof Error ? err.message : "Login failed";
+      set({ error: message });
+      throw new Error(message);
     } finally {
       set({ isLoading: false});
     }
@@ -45,8 +43,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.setItem("token", res.token);
     set({ user: res.user, error: null });
   } catch (err: unknown) {
-    if (err instanceof Error) set({ error: err.message });
-    else set({ error: "Registration failed" });
+    const message = err instanceof Error ? err.message : "Registration failed";
+    set({ error: message });
+    throw new Error(message);
   } finally {
     set({ isLoading: false });
   }

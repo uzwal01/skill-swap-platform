@@ -19,7 +19,11 @@ const Login = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data);
+      const payload: LoginFormData = {
+        email: data.email.trim().toLowerCase(),
+        password: data.password.trim(),
+      };
+      await login(payload);
       navigate("/dashboard"); // Redirect on success
     } catch (err) {
       console.error(err);
