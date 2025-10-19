@@ -32,9 +32,9 @@ const Home = () => {
             <h2 className="text-2xl font-semibold">Featured Skill Swappers</h2>
             <button onClick={() => navigate('/browse')} className="rounded border px-4 py-2 text-sm">View All Skills</button>
           </div>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {featured.map(user => (
-              <UserCard key={user._id} user={user} onRequest={() => {/* open modal later */}} />
+              <UserCard key={user._id} user={user} onRequest={() => { /* open modal later */ }} />
             ))}
           </div>
         </section>

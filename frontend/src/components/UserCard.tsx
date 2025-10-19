@@ -17,7 +17,7 @@ const UserCard: React.FC<Props> = ({ user, onRequest }) => {
   const topTeach = (user.skillsOffered || []).slice(0, 2);
 
   return (
-    <div className="rounded border bg-white p-4 shadow-sm">
+    <div className="rounded-lg border bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-semibold">
           {initials}
@@ -48,15 +48,15 @@ const UserCard: React.FC<Props> = ({ user, onRequest }) => {
         {onRequest && (
           <button
             onClick={() => onRequest(user)}
-            className="rounded bg-blue-600 px-3 py-1 text-sm text-white"
+            className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
           >
             Request Swap
           </button>
         )}
       </div>
     </div>
+
   );
 };
 
 export default UserCard;
-
