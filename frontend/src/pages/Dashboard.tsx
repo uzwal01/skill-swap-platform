@@ -89,9 +89,33 @@ return (
           <ul className="space-y-2">
             {sessions.map((session) => {
               const partner = user && session.fromUser._id === user._id ? session.toUser : session.fromUser;
+              const durationLabel = session.durationMinutes === 30
+                ? '30 minutes'
+                : session.durationMinutes === 60
+                ? '1 hour'
+                : session.durationMinutes === 90
+                ? '1.5 hours'
+                : session.durationMinutes === 120
+                ? '2 hours'
+                : undefined;
               return (
               <li key={session._id} className="p-4 border rounded shadow-sm">
-                Session with {partner.name} - Status: {session.status}
+                <div className="flex flex-col gap-1">
+                  <div>
+                    <span className="font-medium">Session with</span> {partner.name} — <span className="font-medium">Status:</span> {session.status}
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    {session.message && (
+                      <div><span className="font-medium">Message:</span> {session.message}</div>
+                    )}
+                    <div>
+                      <span className="font-medium">Availability:</span> {session.availability ?? '—'}
+                    </div>
+                    <div>
+                      <span className="font-medium">Duration:</span> {durationLabel ?? '—'}
+                    </div>
+                  </div>
+                </div>
                 <div className="mt-2 flex gap-2">
                   {user && session.status === 'pending' && session.toUser._id === user._id && (
                     <>

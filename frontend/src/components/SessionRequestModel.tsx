@@ -1,20 +1,27 @@
 import React, { useMemo, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { Match } from "@/types/Match";
+import { User } from "@/types/User";
 import { CreateSessionData } from "@/services/sessionService";
 
 type Props = {
   open: boolean;
-  match: Match;
+  match: Match | User;
   onClose: () => void;
   onSubmit: (data: CreateSessionData) => Promise<void> | void;
 };
+
+type Availability = 'weekdays' | 'weekends' | 'any';
+type Duration = 30 | 60 | 90 | 120;
 
 const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }) => {
   const user = useAuthStore((s) => s.user);
   const [fromUserSkill, setFromUserSkill] = useState("");
   const [toUserSkill, setToUserSkill] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
+  const [message, setMessage] = useState("");
+  const [availability, setAvailability] = useState<Availability | undefined>(undefined);
+  const [durationMinutes, setDurationMinutes] = useState<Duration | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,6 +51,9 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
         fromUserSkill,
         toUserSkill,
         scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined,
+        message: message.trim() || undefined,
+        availability,
+        durationMinutes,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create session");
@@ -107,6 +117,51 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
           </div>
 
           <div>
+            <label className="mb-1 block text-sm font-medium">Your Message</label>
+            <textarea
+              className="w-full rounded border p-2"
+              rows={3}
+              placeholder="I want to learn ..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Availability</label>
+              <select
+                className="w-full rounded border p-2"
+                value={availability ?? ''}
+                onChange={(e) => setAvailability(e.target.value ? (e.target.value as Availability) : undefined)}
+              >
+                <option value="">Select availability</option>
+                <option value="weekdays">Weekdays</option>
+                <option value="weekends">Weekends</option>
+                <option value="any">Any</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium">Session Duration</label>
+              <select
+                className="w-full rounded border p-2"
+                value={durationMinutes ?? ''}
+                onChange={(e) => {
+                  const v = e.target.value ? (Number(e.target.value) as Duration) : undefined;
+                  setDurationMinutes(v);
+                }}
+              >
+                <option value="">Select duration</option>
+                <option value={30}>30 minutes</option>
+                <option value={60}>1 hour</option>
+                <option value={90}>1.5 hours</option>
+                <option value={120}>2 hours</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
             <label className="mb-1 block text-sm font-medium">Schedule (optional)</label>
             <input
               type="datetime-local"
@@ -142,4 +197,3 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
 };
 
 export default SessionRequestModel;
-

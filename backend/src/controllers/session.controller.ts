@@ -6,7 +6,17 @@ import { Session } from "../models/Session";
 // Create New Sessions
 export const createSession = async (req: AuthRequest, res: Response) => {
     try {
-        const { toUser, fromUserSkill, toUserSkill, scheduledAt } = req.body;
+        const { toUser, fromUserSkill, toUserSkill, scheduledAt, message, availability, durationMinutes } = req.body;
+
+        const allowedAvailability = ['weekdays', 'weekends', 'any'];
+        if (availability && !allowedAvailability.includes(availability)) {
+            return res.status(400).json({ message: 'Invalid availability' });
+        }
+
+        const allowedDurations = [30, 60, 90, 120];
+        if (durationMinutes && !allowedDurations.includes(Number(durationMinutes))) {
+            return res.status(400).json({ message: 'Invalid duration' });
+        }
 
         const session = await Session.create({
             fromUser: req.user._id,
@@ -14,6 +24,9 @@ export const createSession = async (req: AuthRequest, res: Response) => {
             fromUserSkill,
             toUserSkill,
             scheduledAt,
+            message,
+            availability,
+            durationMinutes,
         });
 
         res.status(201).json(session);

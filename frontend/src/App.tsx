@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
+import { BrowseSkills } from './pages/BrowseSkills';
 
 const App = () => {
 const fetchUser = useAuthStore((state) => state.fetchUser);
@@ -25,6 +26,7 @@ useEffect(() => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/browse" element={<BrowseSkills />} />
 
         {/* Private Route */}
         <Route path="/dashboard" element={

@@ -22,3 +22,20 @@ export const updateProfile = async (
   const response = await api.put("/users/me", data);
   return response.data.user as User;
 };
+
+
+export const getFeaturedUsers = async (): Promise<User[]> => {
+  const response = await api.get('/users/featured');
+  return response.data as User[];
+};
+
+export type BrowseUsersQuery = {
+  search?: string;
+  category?: string;
+  skill?: string;
+};
+
+export const browseUsers = async (query: BrowseUsersQuery): Promise<User[]> => {
+  const response = await api.get('/users', { params: query });
+  return response.data;
+};

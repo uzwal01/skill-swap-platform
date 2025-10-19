@@ -38,3 +38,39 @@ export const updateMe = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+export const getFeaturedUsers = async (_req: AuthRequest, res: Response) => {
+  const users = await User.find().sort({ createdAt: -1 }).limit(6).select('-password');
+  res.json(users);
+};
+
+export const searchUsers = async (req: AuthRequest, res: Response) => {
+  const { search, category, skill } = req.query;
+  const filters: any = {};
+
+  if (search) {
+    filters.$or = [
+      { name: new RegExp(String(search), 'i') },
+      { 'skillsOffered.skill': new RegExp(String(search), 'i') },
+      { 'skillsOffered.category': new RegExp(String(search), 'i') },
+      { 'skillsWanted.skill': new RegExp(String(search), 'i') },
+    ];
+  }
+
+  if (category) {
+    filters['$or'] = [
+      { 'skillsOffered.category': category },
+      { 'skillsWanted.category': category },
+    ];
+  }
+
+  if (skill) {
+    filters['$or'] = [
+      { 'skillsOffered.skill': skill },
+      { 'skillsWanted.skill': skill },
+    ];
+  }
+
+  const users = await User.find(filters).select('-password');
+  res.json(users);
+};

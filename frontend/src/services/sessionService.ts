@@ -7,6 +7,9 @@ export type CreateSessionData = {
     fromUserSkill: string;
     toUserSkill: string;
     scheduledAt?: Date;
+    message?: string;
+    availability?: 'weekdays' | 'weekends' | 'any';
+    durationMinutes?: 30 | 60 | 90 | 120;
 };
 
 
