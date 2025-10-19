@@ -14,7 +14,9 @@ const fetchUser = useAuthStore((state) => state.fetchUser);
 useEffect(() => {
   fetchUser();
   // run once on mount to restore session from token
-}, [fetchUser]);
+  // Note: do not include fetchUser in deps; its reference may not be stable.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   return (
     <div className="min-h-screen bg-gray-50">

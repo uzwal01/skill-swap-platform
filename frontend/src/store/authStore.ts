@@ -25,7 +25,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await loginUser(data);  // Call the login service
+      const res = await loginUser(data);  // Call the login service (typed AuthResponse)
       localStorage.setItem('token', res.token);   // Save the token
       set({ user: res.user, error: null });  // Store the user data in global state
     } catch (err: unknown) {
@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (data: RegisterPayload) => {
   set({ isLoading: true, error: null });
   try {
-    const res = await registerUser(data);
+    const res = await registerUser(data); // typed AuthResponse
     localStorage.setItem("token", res.token);
     set({ user: res.user, error: null });
   } catch (err: unknown) {
@@ -54,11 +54,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   fetchUser: async () => {
     const token = localStorage.getItem("token");
-    if (!token) return;     // Don’t call API if no token
+    if (!token) { set({ isLoading: false }); return; }
     set({ isLoading: true, error: null });
     try {
-      const res = await getCurrentuser();
-      set({ user: res.user });
+      const user = await getCurrentuser(); // typed User
+      set({ user });
     } catch (err: unknown) {
         if (err instanceof Error) {
           set({ error: err.message });

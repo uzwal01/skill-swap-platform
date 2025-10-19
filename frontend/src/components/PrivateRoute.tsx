@@ -8,7 +8,9 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { user, isLoading } = useAuthStore((s) => ({ user: s.user, isLoading: s.isLoading }));
+  // Read slices separately to avoid constructing a new object each render
+  const user = useAuthStore((s) => s.user);
+  const isLoading = useAuthStore((s) => s.isLoading);
 
   if (isLoading) {
     return <div className="p-6 text-center">Checking session…</div>;
