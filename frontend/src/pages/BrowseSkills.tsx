@@ -7,6 +7,8 @@ import { createSession } from "@/services/sessionService";
 import { User } from "@/types/User";
 import { useEffect, useState } from "react";
 import { Match } from "@/types/Match";
+import { createSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
 
 export const BrowseSkills = () => {
   const [filters, setFilters] = useState<BrowseUsersQuery>({});
@@ -15,11 +17,38 @@ export const BrowseSkills = () => {
   const [requestOpen, setRequestOpen] = useState(false);
   const [selected, setSelected] = useState<User|null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const authUser = useAuthStore(s => s.user);
 
   useEffect(() => {
     setLoading(true);
     browseUsers(filters).then(setUsers).finally(() => setLoading(false));
   }, [filters]);
+
+  // Initialize filters from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const next: BrowseUsersQuery = {};
+    const search = params.get('search') || undefined;
+    const category = params.get('category') || undefined;
+    const skill = params.get('skill') || undefined;
+    if (search) next.search = search;
+    if (category) next.category = category;
+    if (skill) next.skill = skill;
+    if (Object.keys(next).length) setFilters(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep URL in sync when filters change
+  useEffect(() => {
+    const sp = createSearchParams({
+      ...(filters.search ? { search: String(filters.search) } : {}),
+      ...(filters.category ? { category: String(filters.category) } : {}),
+      ...(filters.skill ? { skill: String(filters.skill) } : {}),
+    }).toString();
+    navigate({ pathname: '/browse', search: sp ? `?${sp}` : '' }, { replace: true });
+  }, [filters, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -44,7 +73,15 @@ export const BrowseSkills = () => {
           {loading ? <p>Loading...</p> : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {users.map(user => (
-                <UserCard key={user._id} user={user} onRequest={(u) => { setSelected(u); setRequestOpen(true); }} />
+                <UserCard
+                  key={user._id}
+                  user={user}
+                  onRequest={(u) => {
+                    if (!authUser) return navigate('/login');
+                    setSelected(u);
+                    setRequestOpen(true);
+                  }}
+                />
               ))}
             </div>
           )}
@@ -56,7 +93,10 @@ export const BrowseSkills = () => {
           <div className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-white p-4" onClick={(e) => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold">Filters</h3>
-              <button className="rounded border px-2 py-1 text-xs" onClick={() => setFiltersOpen(false)}>Close</button>
+              <div className="flex gap-2">
+                <button className="rounded border px-2 py-1 text-xs" onClick={() => setFilters({})}>Reset</button>
+                <button className="rounded border px-2 py-1 text-xs" onClick={() => setFiltersOpen(false)}>Apply</button>
+              </div>
             </div>
             <FiltersBar value={filters} onChange={setFilters} onReset={() => setFilters({})} />
           </div>

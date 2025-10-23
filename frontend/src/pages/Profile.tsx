@@ -1,5 +1,5 @@
 ﻿import { Navbar } from "@/components/Navbar";
-import { getUserSessions } from "@/services/sessionService";
+import { getUserSessions, updateSessionStatus } from "@/services/sessionService";
 import { getMyProfile, updateProfile, UpdateProfilePayload } from "@/services/userService";
 import { useAuthStore } from "@/store/authStore";
 import { Session } from "@/types/Session";
@@ -20,6 +20,7 @@ const Profile: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [editOpen, setEditOpen] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -102,6 +103,21 @@ const Profile: React.FC = () => {
     .join('')
     .toUpperCase();
   const outgoing = profile ? sessions.filter(s => s.fromUser._id === profile._id) : [];
+  const incoming = profile ? sessions.filter(s => s.toUser._id === profile._id) : [];
+
+  const act = async (id: string, status: 'accepted' | 'rejected' | 'cancelled' | 'completed') => {
+    try {
+      setBusyId(id);
+      await updateSessionStatus(id, status);
+      const list = await getUserSessions();
+      setSessions(list);
+      setSuccess(status === 'accepted' ? 'Request accepted' : status === 'rejected' ? 'Request rejected' : 'Updated');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to update request');
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -167,6 +183,70 @@ const Profile: React.FC = () => {
                       To <span className="font-medium">{s.toUser.name}</span> - {s.fromUserSkill} - {s.toUserSkill}
                       <div className="text-xs text-gray-500">Status: {s.status}{s.availability ? ' | ' + s.availability : ''}{s.durationMinutes ? ' | ' + s.durationMinutes + ' min' : ''}</div>
                       {s.message && <div className="mt-1 text-gray-700">"{s.message}"</div>}
+                      <div className="mt-3 flex gap-2">
+                        {s.status === 'pending' && (
+                          <button
+                            className="rounded bg-gray-600 px-3 py-1 text-white disabled:opacity-50"
+                            disabled={busyId === s._id}
+                            onClick={() => act(s._id, 'cancelled')}
+                          >
+                            Cancel
+                          </button>
+                        )}
+                        {s.status === 'accepted' && (
+                          <button
+                            className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
+                            disabled={busyId === s._id}
+                            onClick={() => act(s._id, 'completed')}
+                          >
+                            Complete
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <h3 className="mb-4 mt-8 text-base font-semibold">Incoming Requests</h3>
+              {incoming.length === 0 ? (
+                <p className="text-sm text-gray-500">No incoming requests.</p>
+              ) : (
+                <ul className="space-y-3 text-sm">
+                  {incoming.map((s) => (
+                    <li key={s._id} className="rounded border p-3">
+                      From <span className="font-medium">{s.fromUser.name}</span> - {s.fromUserSkill} - {s.toUserSkill}
+                      <div className="text-xs text-gray-500">Status: {s.status}{s.availability ? ' | ' + s.availability : ''}{s.durationMinutes ? ' | ' + s.durationMinutes + ' min' : ''}</div>
+                      {s.message && <div className="mt-1 text-gray-700">"{s.message}"</div>}
+                      <div className="mt-3 flex gap-2">
+                        {s.status === 'pending' && (
+                          <>
+                            <button
+                              className="rounded bg-green-600 px-3 py-1 text-white disabled:opacity-50"
+                              disabled={busyId === s._id}
+                              onClick={() => act(s._id, 'accepted')}
+                            >
+                              Accept
+                            </button>
+                            <button
+                              className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
+                              disabled={busyId === s._id}
+                              onClick={() => act(s._id, 'rejected')}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        {s.status === 'accepted' && (
+                          <button
+                            className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
+                            disabled={busyId === s._id}
+                            onClick={() => act(s._id, 'completed')}
+                          >
+                            Complete
+                          </button>
+                        )}
+                      </div>
                     </li>
                   ))}
                 </ul>

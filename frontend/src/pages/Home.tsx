@@ -2,11 +2,18 @@ import { Navbar } from "@/components/Navbar";
 import { getFeaturedUsers } from "@/services/userService";
 import { User } from "@/types/User";
 import UserCard from "@/components/UserCard";
+import SessionRequestModel from "@/components/SessionRequestModel";
+import { createSession } from "@/services/sessionService";
+import { useAuthStore } from "@/store/authStore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
 const Home = () => {
   const [featured, setFeatured] = useState<User[]>([]);
+  const authUser = useAuthStore((s) => s.user);
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -33,12 +40,31 @@ const Home = () => {
             <button onClick={() => navigate('/browse')} className="rounded border px-4 py-2 text-sm">View All Skills</button>
           </div>
           <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featured.map(user => (
-              <UserCard key={user._id} user={user} onRequest={() => { /* open modal later */ }} />
+            {featured.map(u => (
+              <UserCard
+                key={u._id}
+                user={u}
+                onRequest={(clicked) => {
+                  if (!authUser) return navigate('/login');
+                  setSelectedUser(clicked);
+                  setRequestOpen(true);
+                }}
+              />
             ))}
           </div>
         </section>
       </main>
+      {requestOpen && selectedUser && (
+        <SessionRequestModel
+          open={requestOpen}
+          match={selectedUser}
+          onClose={() => setRequestOpen(false)}
+          onSubmit={async (data) => {
+            await createSession(data);
+            setRequestOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };
