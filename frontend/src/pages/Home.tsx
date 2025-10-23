@@ -5,6 +5,7 @@ import UserCard from "@/components/UserCard";
 import SessionRequestModel from "@/components/SessionRequestModel";
 import { createSession } from "@/services/sessionService";
 import { useAuthStore } from "@/store/authStore";
+import { useToastStore } from "@/store/toastStore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -14,6 +15,7 @@ const Home = () => {
   const authUser = useAuthStore((s) => s.user);
   const [requestOpen, setRequestOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const addToast = useToastStore(s => s.addToast);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -61,6 +63,7 @@ const Home = () => {
           onClose={() => setRequestOpen(false)}
           onSubmit={async (data) => {
             await createSession(data);
+            addToast({ type: 'success', message: 'Request sent' });
             setRequestOpen(false);
           }}
         />

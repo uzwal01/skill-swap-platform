@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Match } from "@/types/Match";
 import { createSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
+import { useToastStore } from "@/store/toastStore";
 
 export const BrowseSkills = () => {
   const [filters, setFilters] = useState<BrowseUsersQuery>({});
@@ -20,6 +21,7 @@ export const BrowseSkills = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const authUser = useAuthStore(s => s.user);
+  const addToast = useToastStore(s => s.addToast);
 
   useEffect(() => {
     setLoading(true);
@@ -109,6 +111,7 @@ export const BrowseSkills = () => {
           onClose={() => setRequestOpen(false)}
           onSubmit={async (data) => {
             await createSession(data);
+            addToast({ type: 'success', message: 'Request sent' });
             setRequestOpen(false);
           }}
         />
