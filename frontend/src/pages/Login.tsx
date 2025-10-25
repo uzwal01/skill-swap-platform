@@ -3,11 +3,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData } from "@/types/FormData";
 import { loginSchema } from "@/schemas/loginSchema";
 import { useAuthStore } from "@/store/authStore";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const { login, isLoading, error } = useAuthStore();
   const navigate = useNavigate();
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const next = params.get('next');
 
   const {
     register,
@@ -24,7 +27,7 @@ const Login = () => {
         password: data.password.trim(),
       };
       await login(payload);
-      navigate("/dashboard"); // Redirect on success
+      navigate(next || "/profile"); // Redirect on success
     } catch (err) {
       console.error(err);
     }

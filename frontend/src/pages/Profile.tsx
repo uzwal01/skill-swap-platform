@@ -1,11 +1,16 @@
 ﻿import { Navbar } from "@/components/Navbar";
 import { getUserSessions, updateSessionStatus } from "@/services/sessionService";
+import SessionRequestModel from "@/components/SessionRequestModel";
+import UserCard from "@/components/UserCard";
+import { createSession } from "@/services/sessionService";
+import { getMutualMatches } from "@/services/matchService";
 import { getMyProfile, updateProfile, UpdateProfilePayload } from "@/services/userService";
 import { useAuthStore } from "@/store/authStore";
 import { Session } from "@/types/Session";
 import { User } from "@/types/User";
 import { useEffect, useMemo, useState } from "react";
 import { useToastStore } from "@/store/toastStore";
+import { Match } from "@/types/Match";
 
 const Profile: React.FC = () => {
   const setUser = useAuthStore((s) => s.setUser);
@@ -22,6 +27,10 @@ const Profile: React.FC = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const addToast = useToastStore((s) => s.addToast);
+  const [tab, setTab] = useState<'matches'|'requests'|'messages'>('matches');
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -86,6 +95,17 @@ useEffect(() => {
     }
   };
 
+  // Load matches when Matches tab is active
+  useEffect(() => {
+    if (tab !== 'matches') return;
+    let mounted = true;
+    getMutualMatches()
+      .then((list) => { if (mounted) setMatches(list); })
+      .catch(() => addToast({ type: 'error', message: 'Failed to load matches' }));
+    return () => { mounted = false; };
+  }, [tab, addToast]);
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100">
@@ -139,7 +159,7 @@ useEffect(() => {
           {(profile?.skillsOffered || []).length === 0 ? (
             <span className="text-xs text-gray-400">No skills set</span>
           ) : (
-            profile!.skillsOffered.map((s, i) => (
+            (profile?.skillsOffered ?? []).map((s, i) => (
               <span key={i} className="rounded bg-gray-100 px-2 py-0.5 text-xs">{s.skill}</span>
             ))
           )}
@@ -151,7 +171,7 @@ useEffect(() => {
           {(profile?.skillsWanted || []).length === 0 ? (
             <span className="text-xs text-gray-400">No skills set</span>
           ) : (
-            profile!.skillsWanted.map((s, i) => (
+            (profile?.skillsWanted ?? []).map((s, i) => (
               <span key={i} className="rounded bg-gray-100 px-2 py-0.5 text-xs">{s.skill}</span>
             ))
           )}
@@ -163,94 +183,100 @@ useEffect(() => {
     <section className="md:col-span-2">
       <div className="border-b bg-white px-6 pt-4">
         <div className="flex gap-6 text-sm">
-          <div className="border-b-2 border-black pb-2 font-semibold">Swap Requests</div>
-          <div className="pb-2 text-gray-400">Messages</div>
+          <button className={`pb-2 ${tab==='matches' ? 'border-b-2 border-black font-semibold' : 'text-gray-500'}`} onClick={() => setTab('matches')}>Matches</button>
+          <button className={`pb-2 ${tab==='requests' ? 'border-b-2 border-black font-semibold' : 'text-gray-500'}`} onClick={() => setTab('requests')}>Swap Requests</button>
+          <button className={`pb-2 ${tab==='messages' ? 'border-b-2 border-black font-semibold' : 'text-gray-500'}`} onClick={() => setTab('messages')}>Messages</button>
         </div>
       </div>
       <div className="rounded-b border border-t-0 bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-base font-semibold">Outgoing Requests</h3>
-        {outgoing.length === 0 ? (
-          <p className="text-sm text-gray-500">No outgoing requests.</p>
-        ) : (
-          <ul className="space-y-3 text-sm">
-            {outgoing.map((s) => (
-              <li key={s._id} className="rounded border p-3">
-                To <span className="font-medium">{s.toUser.name}</span> - {s.fromUserSkill} - {s.toUserSkill}
-                <div className="text-xs text-gray-500">Status: {s.status}{s.availability ? ' | ' + s.availability : ''}{s.durationMinutes ? ' | ' + s.durationMinutes + ' min' : ''}</div>
-                {s.message && <div className="mt-1 text-gray-700">"{s.message}"</div>}
-                <div className="mt-3 flex gap-2">
-                  {s.status === 'pending' && (
-                    <button
-                      className="rounded bg-gray-600 px-3 py-1 text-white disabled:opacity-50"
-                      disabled={busyId === s._id}
-                      onClick={() => act(s._id, 'cancelled')}
-                    >
-                      Cancel
-                    </button>
-                  )}
-                  {s.status === 'accepted' && (
-                    <button
-                      className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
-                      disabled={busyId === s._id}
-                      onClick={() => act(s._id, 'completed')}
-                    >
-                      Complete
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+        {tab === 'matches' && (
+          <>
+            {matches.length === 0 ? (
+              <p className="text-sm text-gray-500">No matches yet.</p>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {matches.map((m) => (
+                  <UserCard key={m._id} user={m} onRequest={(u) => { setSelectedUser(u); setRequestOpen(true); }} />
+                ))}
+              </div>
+            )}
+          </>
         )}
+        {tab === 'requests' && (
+  <>
+    <h3 className="mb-4 text-base font-semibold">Outgoing Requests</h3>
+    {outgoing.length === 0 ? (
+      <p className="text-sm text-gray-500">No outgoing requests.</p>
+    ) : (
+      <ul className="space-y-3 text-sm">
+        {outgoing.map((s) => (
+          <li key={s._id} className="rounded border p-3">
+            To <span className="font-medium">{s.toUser.name}</span> - {s.fromUserSkill} - {s.toUserSkill}
+            <div className="text-xs text-gray-500">Status: {s.status}{s.availability ? ' | ' + s.availability : ''}{s.durationMinutes ? ' | ' + s.durationMinutes + ' min' : ''}</div>
+            {s.message && <div className="mt-1 text-gray-700">"{s.message}"</div>}
+            <div className="mt-3 flex gap-2">
+              {s.status === 'pending' && (
+                <button className="rounded bg-gray-600 px-3 py-1 text-white disabled:opacity-50" disabled={busyId === s._id} onClick={() => act(s._id, 'cancelled')}>Cancel</button>
+              )}
+              {s.status === 'accepted' && (
+                <button className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50" disabled={busyId === s._id} onClick={() => act(s._id, 'completed')}>Complete</button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
 
-        <h3 className="mb-4 mt-8 text-base font-semibold">Incoming Requests</h3>
-        {incoming.length === 0 ? (
-          <p className="text-sm text-gray-500">No incoming requests.</p>
-        ) : (
-          <ul className="space-y-3 text-sm">
-            {incoming.map((s) => (
-              <li key={s._id} className="rounded border p-3">
-                From <span className="font-medium">{s.fromUser.name}</span> - {s.fromUserSkill} - {s.toUserSkill}
-                <div className="text-xs text-gray-500">Status: {s.status}{s.availability ? ' | ' + s.availability : ''}{s.durationMinutes ? ' | ' + s.durationMinutes + ' min' : ''}</div>
-                {s.message && <div className="mt-1 text-gray-700">"{s.message}"</div>}
-                <div className="mt-3 flex gap-2">
-                  {s.status === 'pending' && (
-                    <>
-                      <button
-                        className="rounded bg-green-600 px-3 py-1 text-white disabled:opacity-50"
-                        disabled={busyId === s._id}
-                        onClick={() => act(s._id, 'accepted')}
-                      >
-                        Accept
-                      </button>
-                      <button
-                        className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50"
-                        disabled={busyId === s._id}
-                        onClick={() => act(s._id, 'rejected')}
-                      >
-                        Reject
-                      </button>
-                    </>
-                  )}
-                  {s.status === 'accepted' && (
-                    <button
-                      className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
-                      disabled={busyId === s._id}
-                      onClick={() => act(s._id, 'completed')}
-                    >
-                      Complete
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+    <h3 className="mb-4 mt-8 text-base font-semibold">Incoming Requests</h3>
+    {incoming.length === 0 ? (
+      <p className="text-sm text-gray-500">No incoming requests.</p>
+    ) : (
+      <ul className="space-y-3 text-sm">
+        {incoming.map((s) => (
+          <li key={s._id} className="rounded border p-3">
+            From <span className="font-medium">{s.fromUser.name}</span> - {s.fromUserSkill} - {s.toUserSkill}
+            <div className="text-xs text-gray-500">Status: {s.status}{s.availability ? ' | ' + s.availability : ''}{s.durationMinutes ? ' | ' + s.durationMinutes + ' min' : ''}</div>
+            {s.message && <div className="mt-1 text-gray-700">"{s.message}"</div>}
+            <div className="mt-3 flex gap-2">
+              {s.status === 'pending' && (
+                <>
+                  <button className="rounded bg-green-600 px-3 py-1 text-white disabled:opacity-50" disabled={busyId === s._id} onClick={() => act(s._id, 'accepted')}>Accept</button>
+                  <button className="rounded bg-red-600 px-3 py-1 text-white disabled:opacity-50" disabled={busyId === s._id} onClick={() => act(s._id, 'rejected')}>Reject</button>
+                </>
+              )}
+              {s.status === 'accepted' && (
+                <button className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50" disabled={busyId === s._id} onClick={() => act(s._id, 'completed')}>Complete</button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
+  </>
+)}
+
+{tab === 'messages' && (
+          <p className="text-sm text-gray-500">Messages coming soon.</p>
         )}
       </div>
     </section>
   </div>
 </main>
 
+      {requestOpen && selectedUser && (
+        <SessionRequestModel
+          open={requestOpen}
+          match={selectedUser}
+          onClose={() => setRequestOpen(false)}
+          onSubmit={async (data) => {
+            await createSession(data);
+            addToast({ type: 'success', message: 'Request sent' });
+            setRequestOpen(false);
+          }}
+        />
+      )}
+
+{/* Edit Profile */}
       {editOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-lg rounded bg-white p-6 shadow">
@@ -286,7 +312,15 @@ useEffect(() => {
                     offeredList.map((s, i) => (
                       <span key={i} className="flex items-center gap-2 rounded bg-gray-100 px-2 py-0.5 text-xs">
                         {s.category}: {s.skill}
-                        <button type="button" onClick={() => setOfferedList(offeredList.filter((_, idx) => idx !== i))} className="text-gray-500">?</button>
+                        <button
+                          type="button"
+                          title="Remove"
+                          aria-label="Remove"
+                          onClick={() => setOfferedList(offeredList.filter((_, idx) => idx !== i))}
+                          className="text-gray-500"
+                        >
+                          ×
+                        </button>
                       </span>
                     ))
                   )}
@@ -316,7 +350,15 @@ useEffect(() => {
                     wantedList.map((s, i) => (
                       <span key={i} className="flex items-center gap-2 rounded bg-gray-100 px-2 py-0.5 text-xs">
                         {s.category}: {s.skill}
-                        <button type="button" onClick={() => setWantedList(wantedList.filter((_, idx) => idx !== i))} className="text-gray-500">?</button>
+                        <button
+                          type="button"
+                          title="Remove"
+                          aria-label="Remove"
+                          onClick={() => setWantedList(wantedList.filter((_, idx) => idx !== i))}
+                          className="text-gray-500"
+                        >
+                          ×
+                        </button>
                       </span>
                     ))
                   )}
@@ -350,6 +392,11 @@ useEffect(() => {
 };
 
 export default Profile;
+
+
+
+
+
 
 
 

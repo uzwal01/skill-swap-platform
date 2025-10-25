@@ -7,7 +7,7 @@ import { createSession } from "@/services/sessionService";
 import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 const Home = () => {
@@ -18,6 +18,7 @@ const Home = () => {
   const addToast = useToastStore(s => s.addToast);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
 
   useEffect(() => {
     getFeaturedUsers().then(setFeatured).catch(console.error);
@@ -47,7 +48,7 @@ const Home = () => {
                 key={u._id}
                 user={u}
                 onRequest={(clicked) => {
-                  if (!authUser) return navigate('/login');
+                  if (!authUser) return navigate(`/login?next=${encodeURIComponent(location.pathname + location.search)}`);
                   setSelectedUser(clicked);
                   setRequestOpen(true);
                 }}

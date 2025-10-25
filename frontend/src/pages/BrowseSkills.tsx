@@ -79,7 +79,7 @@ export const BrowseSkills = () => {
                   key={user._id}
                   user={user}
                   onRequest={(u) => {
-                    if (!authUser) return navigate('/login');
+                    if (!authUser) return navigate(`/login?next=${encodeURIComponent(location.pathname + location.search)}`);
                     setSelected(u);
                     setRequestOpen(true);
                   }}
@@ -119,3 +119,4 @@ export const BrowseSkills = () => {
     </div>
   );
 };
+
