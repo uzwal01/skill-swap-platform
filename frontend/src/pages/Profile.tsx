@@ -11,6 +11,7 @@ import { User } from "@/types/User";
 import { useEffect, useMemo, useState } from "react";
 import { useToastStore } from "@/store/toastStore";
 import { Match } from "@/types/Match";
+import { X } from "lucide-react";
 
 const Profile: React.FC = () => {
   const setUser = useAuthStore((s) => s.setUser);
@@ -319,7 +320,7 @@ useEffect(() => {
                           onClick={() => setOfferedList(offeredList.filter((_, idx) => idx !== i))}
                           className="text-gray-500"
                         >
-                          ×
+                          <X className="h-2.5 w-2.5"/>
                         </button>
                       </span>
                     ))
@@ -357,7 +358,7 @@ useEffect(() => {
                           onClick={() => setWantedList(wantedList.filter((_, idx) => idx !== i))}
                           className="text-gray-500"
                         >
-                          ×
+                          <X className="h-2.5 w-2.5"/>
                         </button>
                       </span>
                     ))

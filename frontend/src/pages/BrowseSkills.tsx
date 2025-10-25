@@ -74,7 +74,9 @@ export const BrowseSkills = () => {
           </div>
           {loading ? <p>Loading...</p> : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {users.map(user => (
+              {users
+                .filter(u => u._id !== (authUser?._id ?? ''))
+                .map(user => (
                 <UserCard
                   key={user._id}
                   user={user}
@@ -119,4 +121,3 @@ export const BrowseSkills = () => {
     </div>
   );
 };
-

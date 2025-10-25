@@ -43,7 +43,9 @@ const Home = () => {
             <button onClick={() => navigate('/browse')} className="rounded border px-4 py-2 text-sm">View All Skills</button>
           </div>
           <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featured.map(u => (
+            {featured
+              .filter(u => u._id !== (authUser?._id ?? ''))
+              .map(u => (
               <UserCard
                 key={u._id}
                 user={u}
