@@ -44,18 +44,25 @@ const UserCard: React.FC<Props> = ({ user, onRequest }) => {
       </div>
 
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs text-gray-500">Member since {new Date(user.createdAt || Date.now()).toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
+        <div className="flex flex-col">
+          <span className="text-sm text-gray-600">Member since: </span>
+          <span className="text-xs text-gray-500">
+            {new Date(user.createdAt || Date.now()).toLocaleString("default", {
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
+        </div>
         {onRequest && (
           <button
             onClick={() => onRequest(user)}
-            className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+            className="rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
           >
             Request Swap
           </button>
         )}
       </div>
     </div>
-
   );
 };
 

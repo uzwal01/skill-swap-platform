@@ -19,10 +19,10 @@ const ToastContainer: React.FC = () => {
           key={t.id}
           className={`pointer-events-auto rounded text-white shadow ${typeStyles[t.type] || typeStyles.info}`}
         >
-          <div className="flex items-center justify-between px-3 py-2 text-sm">
+          <div className="flex items-center justify-between px-6 py-4 text-sm">
             <span>{t.message}</span>
             <button
-              className="ml-3 rounded bg-black/20 px-2 py-0.5 text-xs"
+              className="ml-3 rounded bg-black/20 px-2 py-1 text-xs"
               onClick={() => removeToast(t.id)}
             >
               Close
