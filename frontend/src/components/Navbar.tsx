@@ -5,7 +5,7 @@ export const Navbar = () => {
   const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
   return (
-    <nav className="sticky top-0 bg-white border-b border-gray-100 shadow-sm">
+    <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
         <Link to="/" className="font-bold text-lg text-blue-600">SkillSwap</Link>
         <nav className="flex items-center gap-6">

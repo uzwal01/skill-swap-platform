@@ -5,7 +5,7 @@ import UserCard from "@/components/UserCard";
 import { browseUsers, BrowseUsersQuery } from "@/services/userService";
 import { createSession } from "@/services/sessionService";
 import { User } from "@/types/User";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Match } from "@/types/Match";
 import { createSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
@@ -25,6 +25,13 @@ export const BrowseSkills = () => {
   const navigate = useNavigate();
   const authUser = useAuthStore(s => s.user);
   const addToast = useToastStore(s => s.addToast);
+  const pageNumbers = useMemo(() => {
+    const total = result?.totalPages ?? 0;
+    if (total <= 1) return [] as number[];
+    const start = Math.max(1, page - 2);
+    const end = Math.min(total, page + 2);
+    return Array.from({ length: Math.max(0, end - start + 1) }, (_, i) => start + i);
+  }, [result?.totalPages, page]);
 
   useEffect(() => {
     setLoading(true);
@@ -107,7 +114,7 @@ export const BrowseSkills = () => {
             </div>
           )}
           {result && result.totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-center gap-3">
+            <div className="mt-6 flex items-center justify-center gap-2">
               <button
                 className="rounded border px-3 py-1 text-sm disabled:opacity-50"
                 disabled={!result.hasPrev}
@@ -115,7 +122,15 @@ export const BrowseSkills = () => {
               >
                 Prev
               </button>
-              <span className="text-sm">Page {result.page} of {result.totalPages}</span>
+              {pageNumbers.map((n) => (
+                <button
+                  key={n}
+                  className={`rounded border px-3 py-1 text-sm ${n === page ? 'bg-black text-white' : ''}`}
+                  onClick={() => setPage(n)}
+                >
+                  {n}
+                </button>
+              ))}
               <button
                 className="rounded border px-3 py-1 text-sm disabled:opacity-50"
                 disabled={!result.hasNext}

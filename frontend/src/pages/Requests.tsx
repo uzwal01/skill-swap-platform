@@ -1,5 +1,5 @@
 import { Navbar } from "@/components/Navbar";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
 import { getUserSessionsPaged, SessionsQuery, updateSessionStatus } from "@/services/sessionService";
@@ -37,6 +37,15 @@ const Requests: React.FC = () => {
 
   const outgoing = (result?.data || []).filter(s => s.fromUser._id === user?._id);
   const incoming = (result?.data || []).filter(s => s.toUser._id === user?._id);
+
+  const pageNumbers = useMemo(() => {
+    if (!result) return [] as number[];
+    const current = params.page ?? 1;
+    const total = result.totalPages;
+    const start = Math.max(1, current - 2);
+    const end = Math.min(total, current + 2);
+    return Array.from({ length: Math.max(0, end - start + 1) }, (_, i) => start + i);
+  }, [params.page, result]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -124,10 +133,30 @@ const Requests: React.FC = () => {
             )}
 
             {result && result.totalPages > 1 && (
-              <div className="mt-6 flex items-center justify-center gap-3">
-                <button className="rounded-lg border border-blue-500 hover:text-blue-500 transition px-3 py-1 text-sm text-gray-800 disabled:opacity-50 disabled:hover:text-gray-800" disabled={!result.hasPrev} onClick={() => setParams(p => ({ ...p, page: Math.max(1, (p.page ?? 1) - 1) }))}>Prev</button>
-                <span className="text-sm">Page {result.page} of {result.totalPages}</span>
-                <button className="rounded-lg border border-blue-500 hover:text-blue-500 transition px-3 py-1 text-sm text-gray-800 disabled:opacity-50 disabled:hover:text-gray-800" disabled={!result.hasNext} onClick={() => setParams(p => ({ ...p, page: (p.page ?? 1) + 1 }))}>Next</button>
+              <div className="mt-6 flex items-center justify-center gap-2">
+                <button
+                  className="rounded-lg border border-blue-500 hover:text-blue-500 transition px-3 py-1 text-sm text-gray-800 disabled:opacity-50 disabled:hover:text-gray-800"
+                  disabled={!result.hasPrev}
+                  onClick={() => setParams(p => ({ ...p, page: Math.max(1, (p.page ?? 1) - 1) }))}
+                >
+                  Prev
+                </button>
+                {pageNumbers.map((n) => (
+                  <button
+                    key={n}
+                    className={`rounded border px-3 py-1 text-sm ${n === (params.page ?? 1) ? 'bg-black text-white' : ''}`}
+                    onClick={() => setParams(p => ({ ...p, page: n }))}
+                  >
+                    {n}
+                  </button>
+                ))}
+                <button
+                  className="rounded-lg border border-blue-500 hover:text-blue-500 transition px-3 py-1 text-sm text-gray-800 disabled:opacity-50 disabled:hover:text-gray-800"
+                  disabled={!result.hasNext}
+                  onClick={() => setParams(p => ({ ...p, page: (p.page ?? 1) + 1 }))}
+                >
+                  Next
+                </button>
               </div>
             )}
           </>

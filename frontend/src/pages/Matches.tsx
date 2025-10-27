@@ -6,7 +6,7 @@ import { getMutualMatchesPaged } from "@/services/matchService";
 import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
 import { Match } from "@/types/Match";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const Matches: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -17,6 +17,14 @@ const Matches: React.FC = () => {
   const [selected, setSelected] = useState<Match | null>(null);
   const authUser = useAuthStore((s) => s.user);
   const addToast = useToastStore((s) => s.addToast);
+
+  const pageNumbers = useMemo(() => {
+    const total = result?.totalPages ?? 0;
+    if (total <= 1) return [] as number[];
+    const start = Math.max(1, page - 2);
+    const end = Math.min(total, page + 2);
+    return Array.from({ length: Math.max(0, end - start + 1) }, (_, i) => start + i);
+  }, [result?.totalPages, page]);
 
   useEffect(() => {
     setLoading(true);
@@ -53,10 +61,30 @@ const Matches: React.FC = () => {
         )}
 
         {result && result.totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <button className="rounded border px-3 py-1 text-sm disabled:opacity-50" disabled={!result.hasPrev} onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</button>
-            <span className="text-sm">Page {result.page} of {result.totalPages}</span>
-            <button className="rounded border px-3 py-1 text-sm disabled:opacity-50" disabled={!result.hasNext} onClick={() => setPage((p) => p + 1)}>Next</button>
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <button
+              className="rounded border px-3 py-1 text-sm disabled:opacity-50"
+              disabled={!result.hasPrev}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Prev
+            </button>
+            {pageNumbers.map((n) => (
+              <button
+                key={n}
+                className={`rounded border px-3 py-1 text-sm ${n === page ? 'bg-black text-white' : ''}`}
+                onClick={() => setPage(n)}
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              className="rounded border px-3 py-1 text-sm disabled:opacity-50"
+              disabled={!result.hasNext}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </button>
           </div>
         )}
       </main>

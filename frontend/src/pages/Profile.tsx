@@ -165,6 +165,8 @@ const Profile: React.FC = () => {
     ? sessions.filter((s) => s.toUser._id === profile._id)
     : [];
 
+  // Full lists are shown in the tab (no preview limiting)
+
   const act = async (
     id: string,
     status: "accepted" | "rejected" | "cancelled" | "completed"
