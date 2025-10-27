@@ -31,7 +31,18 @@ export const getMatches = async (req: AuthRequest, res: Response) => {
             return canTeachYou && wantsToLearnFromYou;
         });
 
-        res.json(matches);
+        // Pagination
+        const page = Math.max(1, parseInt(String(req.query.page ?? '1'), 10) || 1);
+        const limitRaw = parseInt(String(req.query.limit ?? '12'), 10) || 12;
+        const limit = Math.max(1, Math.min(50, limitRaw));
+        const total = matches.length;
+        const totalPages = Math.max(1, Math.ceil(total / limit));
+        const start = (page - 1) * limit;
+        const data = matches.slice(start, start + limit);
+        const hasNext = page * limit < total;
+        const hasPrev = page > 1;
+
+        res.json({ data, page, limit, total, totalPages, hasNext, hasPrev });
 
     } catch (err) {
         console.error('Match Error:', err);

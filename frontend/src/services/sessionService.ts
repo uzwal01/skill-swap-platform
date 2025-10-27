@@ -1,5 +1,6 @@
 import api from "@/lib/api.ts";
 import { Session } from "@/types/Session.ts";
+import { Paginated } from "@/types/Paginated";
 
 
 export type CreateSessionData = {
@@ -22,7 +23,27 @@ export const createSession = async (data: CreateSessionData): Promise<Session> =
 // Get user sessions
 export const getUserSessions = async (): Promise<Session[]> => {
     const response = await api.get(`/sessions/my`);
-    return response.data;
+    // Backward-compatible: unwrap if server returns paginated envelope
+    return (response.data && response.data.data) ? response.data.data as Session[] : response.data as Session[];
+}
+
+export type SessionsQuery = {
+    page?: number;
+    limit?: number;
+    type?: 'incoming' | 'outgoing';
+    status?: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'completed';
+};
+
+export const getUserSessionsPaged = async (query: SessionsQuery = {}): Promise<Paginated<Session>> => {
+    const response = await api.get(`/sessions/my`, { params: query });
+    const data = response.data;
+    if (Array.isArray(data)) {
+        const arr = data as Session[];
+        const page = query.page ?? 1;
+        const limit = query.limit ?? arr.length;
+        return { data: arr, page, limit, total: arr.length, totalPages: 1, hasNext: false, hasPrev: page > 1 };
+    }
+    return data as Paginated<Session>;
 }
 
 // Update Session status

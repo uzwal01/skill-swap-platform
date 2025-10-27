@@ -16,6 +16,7 @@ import { useAuthStore } from "@/store/authStore";
 import { Session } from "@/types/Session";
 import { User } from "@/types/User";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToastStore } from "@/store/toastStore";
 import { Match } from "@/types/Match";
 import { X } from "lucide-react";
@@ -56,6 +57,7 @@ const Profile: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [requestOpen, setRequestOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const navigate = useNavigate();
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -292,6 +294,14 @@ const Profile: React.FC = () => {
             <div className="rounded-b-xl border border-gray-100 bg-white shadow-sm mt-1 p-6">
               {tab === "matches" && (
                 <>
+                  <div className="mb-3 flex justify-end">
+                    <button
+                      className="rounded-lg border border-blue-300 hover:text-blue-500 transition px-3 py-1 text-xs text-gray-500"
+                      onClick={() => navigate("/matches")}
+                    >
+                      View all matches
+                    </button>
+                  </div>
                   {matches.length === 0 ? (
                     <p className="text-sm text-gray-500">No matches yet.</p>
                   ) : (
@@ -313,6 +323,14 @@ const Profile: React.FC = () => {
               )}
               {tab === "requests" && (
                 <>
+                <div className="flex justify-end">
+                    <button
+                      className="rounded-lg border border-blue-300 hover:text-blue-500 transition px-3 py-1 text-xs text-gray-500"
+                      onClick={() => navigate("/requests")}
+                    >
+                      View all requests 
+                    </button>
+                  </div>
                   <h3 className="mb-4 text-base font-semibold">
                     Outgoing Requests
                   </h3>
@@ -323,7 +341,10 @@ const Profile: React.FC = () => {
                   ) : (
                     <ul className="space-y-3 text-sm">
                       {outgoing.map((s) => (
-                        <li key={s._id} className="rounded-lg border border-blue-200 shadow-sm p-3">
+                        <li
+                          key={s._id}
+                          className="rounded-lg border border-blue-200 shadow-sm p-3"
+                        >
                           To{" "}
                           <span className="font-medium">{s.toUser.name}</span> -{" "}
                           {s.fromUserSkill} - {s.toUserSkill}
@@ -374,7 +395,10 @@ const Profile: React.FC = () => {
                   ) : (
                     <ul className="space-y-3 text-sm">
                       {incoming.map((s) => (
-                        <li key={s._id} className="rounded-lg border border-blue-200 shadow-sm p-3 ">
+                        <li
+                          key={s._id}
+                          className="rounded-lg border border-blue-200 shadow-sm p-3 "
+                        >
                           From{" "}
                           <span className="font-medium">{s.fromUser.name}</span>{" "}
                           - {s.fromUserSkill} - {s.toUserSkill}
@@ -423,6 +447,7 @@ const Profile: React.FC = () => {
                       ))}
                     </ul>
                   )}
+                  
                 </>
               )}
 

@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import { User } from "@/types/User";
+import { Paginated } from "@/types/Paginated";
 
 // Payload for updating current user profile
 export type UpdateProfilePayload = Partial<Pick<
@@ -33,9 +34,11 @@ export type BrowseUsersQuery = {
   search?: string;
   category?: string;
   skill?: string;
+  page?: number;
+  limit?: number;
 };
 
-export const browseUsers = async (query: BrowseUsersQuery): Promise<User[]> => {
+export const browseUsers = async (query: BrowseUsersQuery): Promise<Paginated<User>> => {
   const response = await api.get('/users', { params: query });
-  return response.data;
+  return response.data as Paginated<User>;
 };

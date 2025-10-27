@@ -10,11 +10,14 @@ import { Match } from "@/types/Match";
 import { createSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
+import { Paginated } from "@/types/Paginated";
 
 export const BrowseSkills = () => {
   const [filters, setFilters] = useState<BrowseUsersQuery>({});
-  const [users, setUsers] = useState<User[]>([]);
+  const [result, setResult] = useState<Paginated<User> | null>(null);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const limit = 12;
   const [requestOpen, setRequestOpen] = useState(false);
   const [selected, setSelected] = useState<User|null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -25,8 +28,10 @@ export const BrowseSkills = () => {
 
   useEffect(() => {
     setLoading(true);
-    browseUsers(filters).then(setUsers).finally(() => setLoading(false));
-  }, [filters]);
+    browseUsers({ ...filters, page, limit })
+      .then((res) => setResult(res))
+      .finally(() => setLoading(false));
+  }, [filters, page, limit]);
 
   // Initialize filters from URL on mount
   useEffect(() => {
@@ -35,10 +40,15 @@ export const BrowseSkills = () => {
     const search = params.get('search') || undefined;
     const category = params.get('category') || undefined;
     const skill = params.get('skill') || undefined;
+    const pageParam = params.get('page');
     if (search) next.search = search;
     if (category) next.category = category;
     if (skill) next.skill = skill;
     if (Object.keys(next).length) setFilters(next);
+    if (pageParam) {
+      const p = parseInt(pageParam, 10);
+      if (!isNaN(p) && p > 0) setPage(p);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -48,9 +58,15 @@ export const BrowseSkills = () => {
       ...(filters.search ? { search: String(filters.search) } : {}),
       ...(filters.category ? { category: String(filters.category) } : {}),
       ...(filters.skill ? { skill: String(filters.skill) } : {}),
+      ...(page ? { page: String(page) } : {}),
     }).toString();
     navigate({ pathname: '/browse', search: sp ? `?${sp}` : '' }, { replace: true });
-  }, [filters, navigate]);
+  }, [filters, page, navigate]);
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [filters.search, filters.category, filters.skill]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -74,7 +90,7 @@ export const BrowseSkills = () => {
           </div>
           {loading ? <p>Loading...</p> : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {users
+              {(result?.data ?? [])
                 .filter(u => u._id !== (authUser?._id ?? ''))
                 .map(user => (
                 <UserCard
@@ -88,6 +104,25 @@ export const BrowseSkills = () => {
                   className="transition-transform hover:-translate-y-1 hover:shadow-lg"
                 />
               ))}
+            </div>
+          )}
+          {result && result.totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <button
+                className="rounded border px-3 py-1 text-sm disabled:opacity-50"
+                disabled={!result.hasPrev}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </button>
+              <span className="text-sm">Page {result.page} of {result.totalPages}</span>
+              <button
+                className="rounded border px-3 py-1 text-sm disabled:opacity-50"
+                disabled={!result.hasNext}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </button>
             </div>
           )}
         </section>

@@ -41,15 +41,43 @@ export const createSession = async (req: AuthRequest, res: Response) => {
 export const getMySessions = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user._id;
+        const { type, status } = req.query as { type?: string; status?: string };
 
-        const sessions = await Session.find({
-            $or: [{ fromUser: userId }, { toUser: userId }],
-        })
-            .populate('fromUser', 'name email')
-            .populate('toUser', 'name email')
-            .sort({ createdAt: -1 });
+        // Build base filter
+        const filter: any = {};
+        if (type === 'incoming') {
+            filter.toUser = userId;
+        } else if (type === 'outgoing') {
+            filter.fromUser = userId;
+        } else {
+            filter.$or = [{ fromUser: userId }, { toUser: userId }];
+        }
 
-        res.json(sessions);
+        if (status) {
+            filter.status = status;
+        }
+
+        // Pagination
+        const page = Math.max(1, parseInt(String(req.query.page ?? '1'), 10) || 1);
+        const limitRaw = parseInt(String(req.query.limit ?? '10'), 10) || 10;
+        const limit = Math.max(1, Math.min(50, limitRaw));
+        const skip = (page - 1) * limit;
+
+        const [total, data] = await Promise.all([
+            Session.countDocuments(filter),
+            Session.find(filter)
+                .populate('fromUser', 'name email')
+                .populate('toUser', 'name email')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+        ]);
+
+        const totalPages = Math.max(1, Math.ceil(total / limit));
+        const hasNext = page * limit < total;
+        const hasPrev = page > 1;
+
+        res.json({ data, page, limit, total, totalPages, hasNext, hasPrev });
     } catch (err) {
         console.error('Get Sessions Error:', err);
         res.status(500).json({ message: 'Internal Server Error' });

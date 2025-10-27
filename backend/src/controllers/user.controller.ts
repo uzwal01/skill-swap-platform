@@ -46,31 +46,60 @@ export const getFeaturedUsers = async (_req: AuthRequest, res: Response) => {
 
 export const searchUsers = async (req: AuthRequest, res: Response) => {
   const { search, category, skill } = req.query;
-  const filters: any = {};
+
+  // Build filters using AND of independent OR clauses to avoid overwriting
+  const and: any[] = [];
 
   if (search) {
-    filters.$or = [
-      { name: new RegExp(String(search), 'i') },
-      { 'skillsOffered.skill': new RegExp(String(search), 'i') },
-      { 'skillsOffered.category': new RegExp(String(search), 'i') },
-      { 'skillsWanted.skill': new RegExp(String(search), 'i') },
-    ];
+    const q = String(search);
+    and.push({
+      $or: [
+        { name: new RegExp(q, 'i') },
+        { 'skillsOffered.skill': new RegExp(q, 'i') },
+        { 'skillsOffered.category': new RegExp(q, 'i') },
+        { 'skillsWanted.skill': new RegExp(q, 'i') },
+      ],
+    });
   }
 
   if (category) {
-    filters['$or'] = [
-      { 'skillsOffered.category': category },
-      { 'skillsWanted.category': category },
-    ];
+    and.push({
+      $or: [
+        { 'skillsOffered.category': category },
+        { 'skillsWanted.category': category },
+      ],
+    });
   }
 
   if (skill) {
-    filters['$or'] = [
-      { 'skillsOffered.skill': skill },
-      { 'skillsWanted.skill': skill },
-    ];
+    and.push({
+      $or: [
+        { 'skillsOffered.skill': skill },
+        { 'skillsWanted.skill': skill },
+      ],
+    });
   }
 
-  const users = await User.find(filters).select('-password');
-  res.json(users);
+  const filters: any = and.length ? { $and: and } : {};
+
+  // Pagination params with sane defaults and caps
+  const page = Math.max(1, parseInt(String(req.query.page ?? '1'), 10) || 1);
+  const limitRaw = parseInt(String(req.query.limit ?? '12'), 10) || 12;
+  const limit = Math.max(1, Math.min(50, limitRaw));
+  const skip = (page - 1) * limit;
+
+  const [total, data] = await Promise.all([
+    User.countDocuments(filters),
+    User.find(filters)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const hasNext = page * limit < total;
+  const hasPrev = page > 1;
+
+  res.json({ data, page, limit, total, totalPages, hasNext, hasPrev });
 };

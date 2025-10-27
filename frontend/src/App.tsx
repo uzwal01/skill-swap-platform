@@ -8,6 +8,8 @@ import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
 import { BrowseSkills } from './pages/BrowseSkills';
 import ToastContainer from './components/ToastContainer';
+import Requests from './pages/Requests';
+import Matches from './pages/Matches';
 
 const App = () => {
 const fetchUser = useAuthStore((state) => state.fetchUser);
@@ -32,6 +34,16 @@ useEffect(() => {
         <Route path="/dashboard" element={<PrivateRoute><Profile /></PrivateRoute>} />        <Route path="/profile" element={
           <PrivateRoute>
             <Profile />
+          </PrivateRoute>
+        } />
+        <Route path="/requests" element={
+          <PrivateRoute>
+            <Requests />
+          </PrivateRoute>
+        } />
+        <Route path="/matches" element={
+          <PrivateRoute>
+            <Matches />
           </PrivateRoute>
         } />
       </Routes>
