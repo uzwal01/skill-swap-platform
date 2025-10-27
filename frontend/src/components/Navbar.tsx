@@ -5,24 +5,24 @@ export const Navbar = () => {
   const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
   return (
-    <header className="border-b bg-white">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="text-xl font-bold">SkillSwap</Link>
+    <nav className="sticky top-0 bg-white border-b border-gray-100 shadow-sm">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
+        <Link to="/" className="font-bold text-lg text-blue-600">SkillSwap</Link>
         <nav className="flex items-center gap-6">
-          <Link to="/browse" className="text-sm font-medium">Browse Skills</Link>
+          <Link to="/browse" className="text-gray-700 hover:text-blue-600">Browse Skills</Link>
         </nav>
         {user ? (
           <div className="flex items-center gap-4">
-            <Link to="/profile" className="text-sm font-medium">My Profile</Link>
-            <button onClick={logout} className="rounded bg-black px-4 py-2 text-sm text-white">Log out</button>
+            <Link to="/profile" className="text-gray-700 hover:text-blue-600">My Profile</Link>
+            <button onClick={logout} className="bg-blue-500 text-white px-3 py-1.5 rounded-md hover:bg-blue-600">Log out</button>
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <Link to="/login" className="text-sm font-medium text-gray-700">Log in</Link>
-            <Link to="/register" className="rounded bg-black px-4 py-2 text-sm text-white">Sign up</Link>
+            <Link to="/login" className="text-gray-700 hover:text-blue-600">Log in</Link>
+            <Link to="/register" className="bg-blue-500 text-white px-3 py-1.5 rounded-md hover:bg-blue-600">Sign up</Link>
           </div>
         )}
       </div>
-    </header>
+    </nav>
   );
 };

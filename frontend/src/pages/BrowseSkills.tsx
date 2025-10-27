@@ -64,13 +64,13 @@ export const BrowseSkills = () => {
             <button
               type="button"
               onClick={() => setFiltersOpen(true)}
-              className="rounded border px-3 py-2 text-sm"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md transition"
             >
               Filters
             </button>
           </div>
           <div className="mb-4">
-            <input className="w-full rounded border px-4 py-2" placeholder="Search skills or keywords..." value={filters.search ?? ''} onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}/>
+            <input className="py-2 px-4 border border-gray-300 rounded-md focus:ring-1 mt-2 w-full focus:ring-blue-300 focus:outline-none" placeholder="Search skills or keywords..." value={filters.search ?? ''} onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}/>
           </div>
           {loading ? <p>Loading...</p> : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -85,6 +85,7 @@ export const BrowseSkills = () => {
                     setSelected(u);
                     setRequestOpen(true);
                   }}
+                  className="transition-transform hover:-translate-y-1 hover:shadow-lg"
                 />
               ))}
             </div>
@@ -98,8 +99,8 @@ export const BrowseSkills = () => {
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold">Filters</h3>
               <div className="flex gap-2">
-                <button className="rounded border px-2 py-1 text-xs" onClick={() => setFilters({})}>Reset</button>
-                <button className="rounded border px-2 py-1 text-xs" onClick={() => setFiltersOpen(false)}>Apply</button>
+                <button className="bg-blue-500 hover:bg-blue-600 text-sm text-white px-2 py-1 rounded-md transition" onClick={() => setFilters({})}>Reset</button>
+                <button className="bg-blue-600 hover:bg-blue-500 text-sm text-white px-2 py-1 rounded-md transition" onClick={() => setFiltersOpen(false)}>Apply</button>
               </div>
             </div>
             <FiltersBar value={filters} onChange={setFilters} onReset={() => setFilters({})} />

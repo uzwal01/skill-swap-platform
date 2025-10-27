@@ -25,15 +25,15 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-6xl px-4 py-16">
-        <section className="text-center">
-          <h1 className="text-4xl font-bold">Swap Skills, Learn & Teach for Free!</h1>
-          <p className="mt-4 text-gray-600">Exchange your expertise with others...</p>
-          <div className="mt-8 flex justify-center gap-3">
-            <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-80 rounded border px-4 py-2" placeholder="Search skills (e.g., Graphic Design)" />
-            <button onClick={() => navigate(`/browse?search=${encodeURIComponent(searchTerm)}`)} className="rounded bg-black px-4 py-2 text-white">Find Skills</button>
+        <section className="py-16 text-center">
+          <h1 className="text-4xl font-semibold text-gray-900 tracking-tight">Swap Skills, Learn & Teach for Free!</h1>
+          <p className="text-gray-600 mt-2">Exchange your expertise with others...</p>
+          <div className="mt-8 flex justify-center">
+            <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-80 p-3 border border-gray-300 rounded-l-md focus:ring-1 focus:ring-blue-300 focus:outline-none" placeholder="Search skills (e.g., Graphic Design)" />
+            <button onClick={() => navigate(`/browse?search=${encodeURIComponent(searchTerm)}`)} className="bg-blue-500 hover:bg-blue-600 text-white px-5 rounded-r-md transition">Find Skills</button>
           </div>
         </section>
 
@@ -54,6 +54,7 @@ const Home = () => {
                   setSelectedUser(clicked);
                   setRequestOpen(true);
                 }}
+                className="transition-transform hover:-translate-y-1 hover:shadow-lg"
               />
             ))}
           </div>

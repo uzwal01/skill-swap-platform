@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {  RegisterPayload } from "@/types/FormData";
 import { registerSchema } from "@/schemas/registerSchema";
 import { useAuthStore } from "@/store/authStore";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import z from "zod";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -53,17 +53,18 @@ const Register = () => {
   };
 
   return (
-    <div className="max-w-sm mx-auto">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full mx-auto rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
       <h1 className="text-2xl font-bold text-center mb-4">Register</h1>
       {error && <p className="text-red-500 mb-2">{error}</p>}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-6">
         {/* Name */}
         <div>
           <label className="block text-sm">Name</label>
           <input
             type="text"
             {...register("name")}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
           />
           {errors.name && (
             <p className="text-red-500 text-xs">{errors.name.message}</p>
@@ -76,7 +77,7 @@ const Register = () => {
           <input
             type="email"
             {...register("email")}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
           />
           {errors.email && (
             <p className="text-red-500 text-xs">{errors.email.message}</p>
@@ -89,7 +90,7 @@ const Register = () => {
           <input
             type="password"
             {...register("password")}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
           />
           {errors.password && (
             <p className="text-red-500 text-xs">{errors.password.message}</p>
@@ -102,7 +103,7 @@ const Register = () => {
           <input
             type="password"
             {...register("confirmPassword")}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
           />
           {errors.confirmPassword && (
             <p className="text-red-500 text-xs">{errors.confirmPassword.message}</p>
@@ -116,10 +117,10 @@ const Register = () => {
             type="text"
             {...register("skillsOfferedInput")}
             placeholder="Example: Programming:React, Design:Figma"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
           />
           <p className="text-gray-400 text-xs mt-1">
-            Enter as Category:Skill pairs, separated by commas.
+            Enter as Category: Skill pairs, separated by commas.
           </p>
           {errors.skillsOfferedInput && (
             <p className="text-red-500 text-xs">{errors.skillsOfferedInput.message}</p>
@@ -133,10 +134,10 @@ const Register = () => {
             type="text"
             {...register("skillsWantedInput")}
             placeholder="Example: Programming:Node.js, Design:Photoshop"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
           />
           <p className="text-gray-400 text-xs mt-1">
-            Enter as Category:Skill pairs, separated by commas.
+            Enter as Category: Skill pairs, separated by commas.
           </p>
           {errors.skillsWantedInput && (
             <p className="text-red-500 text-xs">{errors.skillsWantedInput.message}</p>
@@ -146,12 +147,17 @@ const Register = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full p-2 bg-blue-500 text-white rounded"
+          className="w-full p-2 mt-2 bg-blue-500 hover:bg-blue-600 rounded-md transition text-white"
           disabled={isLoading}
         >
           {isLoading ? "Registering..." : "Register"}
         </button>
+
+        <div className="text-center text-sm mt-2">
+          <p className="text-gray-600">Already have an account? <Link to="/login" className="text-red-500 hover:text-red-600">Log In</Link></p>
+        </div>
       </form>
+    </div>
     </div>
   );
 };
