@@ -143,11 +143,12 @@ Base URL: `http://localhost:5000/api/v1`
 | Method | Endpoint          | Description                                                                |
 | ------ | ----------------- | -------------------------------------------------------------------------- |
 | `GET`  | `/users`          | Browse users with filters (`search`, `category`, `skill`, `page`, `limit`) |
-- `search` is case‑insensitive (name and skills)
-- `category` and `skill` are matched case‑insensitively via regex
+|        |                   |  `search` is case‑insensitive (name and skills)                                                                          |
+|        |                   |  `category` and `skill` are matched case‑insensitively via regex                                                                           |
 | `GET`  | `/users/featured` | Get recent/featured users                                                  |
 | `GET`  | `/users/me`       | Get current user profile                                                   |
 | `PUT`  | `/users/me`       | Update profile (name, bio, avatar, skills)                                 |
+
 
 
 #### Match Endpoints
