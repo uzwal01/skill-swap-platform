@@ -66,6 +66,7 @@ Default frontend: `http://localhost:5173`.
 - **Frontend API base URL:**
 - Hard-coded in `frontend/src/lib/api.ts` as `http://localhost:5000/api/v1`.
 
+---
 
 
 ## Application Overview
@@ -79,7 +80,7 @@ Default frontend: `http://localhost:5173`.
 
 ### Data Model (simplified)
 User
-```
+```json
 {
   _id: string,
   name: string,
@@ -93,7 +94,7 @@ User
 ```
 
 Session
-```
+```json
 {
   _id: string,
   fromUser: User,           // populated
@@ -110,7 +111,7 @@ Session
 
 ### Pagination Envelope
 Most list endpoints return this shape:
-```
+```json
 {
   data: T[],
   page: number,
@@ -123,6 +124,9 @@ Most list endpoints return this shape:
 ```
 
 The frontend defines `Paginated<T>` and uses numbered pagination across Browse, Matches, and Requests. The page is synced with the URL (e.g., `/browse?page=2`).
+
+--- 
+
 
 ## API Reference
 
@@ -198,6 +202,9 @@ Base URL: `http://localhost:5000/api/v1`
 | `FiltersBar`          | Search/filter users              |
 | `SessionRequestModal` | Create new swap request          |
 | `ToastContainer`      | Global toasts (success/error)    |
+
+
+---
 
 
 ## Matching Logic (high level)
