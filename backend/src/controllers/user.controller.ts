@@ -63,19 +63,21 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
   }
 
   if (category) {
+    const c = new RegExp(String(category), 'i');
     and.push({
       $or: [
-        { 'skillsOffered.category': category },
-        { 'skillsWanted.category': category },
+        { 'skillsOffered.category': c },
+        { 'skillsWanted.category': c },
       ],
     });
   }
 
   if (skill) {
+    const s = new RegExp(String(skill), 'i');
     and.push({
       $or: [
-        { 'skillsOffered.skill': skill },
-        { 'skillsWanted.skill': skill },
+        { 'skillsOffered.skill': s },
+        { 'skillsWanted.skill': s },
       ],
     });
   }
