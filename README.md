@@ -126,7 +126,7 @@ The frontend defines `Paginated<T>` and uses numbered pagination across Browse, 
 
 ## API Reference
 
-### Backend
+### Backend Structure
 Base URL: `http://localhost:5000/api/v1`
 
 #### Auth Endpoints
@@ -160,54 +160,45 @@ Base URL: `http://localhost:5000/api/v1`
 
 #### Session (Swap Requests)
 
-| Method | Endpoint               | Description                                  |                      |
-| ------ | ---------------------- | -------------------------------------------- | -------------------- |
-| `POST` | `/sessions`            | Create a swap request                        |                      |
-| `GET`  | `/sessions/my`         | List my sessions (`type=incoming             | outgoing`, `status`) |
-| `PUT`  | `/sessions/:id/status` | Update status (`accepted`, `rejected`, etc.) |                      |
+| Method | Endpoint               | Description                                  |
+| ------ | ---------------------- | -------------------------------------------- | 
+| `POST` | `/sessions`            | Create a swap request `{ toUser, fromUserSkill, toUserSkill, availability?, durationMinutes?, message? }`                       |
+| `GET`  | `/sessions/my`         | List my sessions (supports `page`, `limit`, `type`=incoming|outgoing, `status`) |
+| `PUT`  | `/sessions/:id/status` | Update status (`accepted | rejected | cancelled | completed`) |
 
 
 
+### Frontend Overview
+
+| Route       | Description                                   |
+| ----------- | --------------------------------------------- |
+| `/`         | Home – hero, featured users, search           |
+| `/login`    | Login form                                    |
+| `/register` | Register form                                 |
+| `/browse`   | Browse skills (filters + pagination)          |
+| `/profile`  | Profile dashboard – skills, matches, requests |
+| `/matches`  | Full list of mutual matches                   |
+| `/requests` | All session requests with filters             |
 
 
-Base URL: `http://localhost:5000/api/v1`
+#### Frontend State Management
 
-Auth
-- `POST /auth/register` – register user
-- `POST /auth/login` – login, returns `{ token, user }`
-- `GET  /auth/me` – current user (requires `Authorization`)
+| Store        | Purpose                                        |
+| ------------ | ---------------------------------------------- |
+| `authStore`  | Login/register/logout, user + token management |
+| `toastStore` | Global notifications (success/error)           |
 
-Users
-- `GET  /users` – browse with filters `search`, `category`, `skill`, `page`, `limit`
-  - `search` is case‑insensitive (name and skills)
-  - `category` and `skill` are matched case‑insensitively via regex
-- `GET  /users/featured` – a handful of recent users
-- `GET  /users/me` – current user
-- `PUT  /users/me` – update profile (name, bio, avatarUrl, skills)
 
-Matches
-- `GET  /matches` – mutual matches for the current user (supports `page`, `limit`)
+#### Core Components
 
-Sessions (Swap Requests)
-- `POST /sessions` – create a request `{ toUser, fromUserSkill, toUserSkill, availability?, durationMinutes?, message? }`
-- `GET  /sessions/my` – list my sessions (supports `page`, `limit`, `type`=incoming|outgoing, `status`)
-- `PUT  /sessions/:id/status` – update status: `accepted | rejected | cancelled | completed`
+| Component             | Purpose                          |
+| --------------------- | -------------------------------- |
+| `Navbar`              | Top navigation bar               |
+| `UserCard`            | Displays user info + swap button |
+| `FiltersBar`          | Search/filter users              |
+| `SessionRequestModal` | Create new swap request          |
+| `ToastContainer`      | Global toasts (success/error)    |
 
-## Frontend Structure
-Routes
-- `/` Home – hero + featured users + search handoff to Browse
-- `/login`, `/register` – auth forms
-- `/browse` – filters (search/category/skill) + numbered pagination
-- `/profile` – profile summary, skills, matches tab, swap requests tab
-- `/matches` – full paginated matches list
-- `/requests` – full paginated requests list with type/status filters
-
-State
-- `authStore`: user, token management (login/register/fetchUser/logout)
-- `toastStore`: lightweight success/error toasts
-
-Notable Components
-- `Navbar`, `UserCard`, `FiltersBar` (Browse filters), `SessionRequestModel` (request modal), `ToastContainer`
 
 ## Matching Logic (high level)
 - Server gets all users except current
