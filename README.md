@@ -80,8 +80,7 @@ Default frontend: `http://localhost:5173`.
 
 ### Data Model (simplified)
 User
-```json
-{
+```
   _id: string,
   name: string,
   email: string,
@@ -94,7 +93,7 @@ User
 ```
 
 Session
-```json
+```
 {
   _id: string,
   fromUser: User,           // populated
@@ -111,7 +110,7 @@ Session
 
 ### Pagination Envelope
 Most list endpoints return this shape:
-```json
+```
 {
   data: T[],
   page: number,
