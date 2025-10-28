@@ -1,65 +1,80 @@
 # Skill Swap Platform
 
-A full‑stack web app where people exchange skills by matching what they can teach with what they want to learn. Users can browse skills, find mutual matches, send swap requests, and manage their sessions.
+A full-stack web application where users can **exchange skills**, teaching what they know and learning what they want.
+Users can browse other's skills, find mutual matches, send swap requests, and manage sessions.
 
 ## Features
-- Authentication: register, login, protected routes, session hydration on reload
-- Profile: edit name/title (bio), avatar URL, and skill chips (offered/wanted)
-- Discovery: featured users and a Browse page with filters + numbered pagination
-- Matching: mutual matches, dedicated paginated Matches page
-- Requests: create, accept/reject/cancel/complete, with a paginated Requests page
-- API: server‑side pagination envelopes; consistent types shared in the frontend
-- DX: React + Vite + Zustand, Express + Mongoose; clear FE/BE separation
+| Category           | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| **Authentication** | Register, login, JWT auth, protected routes             |
+| **Profiles**       | Edit name, bio, avatar, and skills (offered/wanted)     |
+| **Discovery**      | Browse users with filters and pagination                |
+| **Matching**       | Find mutual matches automatically                       |
+| **Requests**       | Send, accept, reject, cancel, or complete swap sessions |
+| **Persistence**    | Session hydration and token storage                     |
+| **Tech Stack**     | React + Zustand + Express + MongoDB + TypeScript        |
+
 
 ## Tech Stack
-- Frontend: React (Vite), TypeScript, Zustand, React Router, Axios, Tailwind CSS
-- Backend: Node.js (Express), TypeScript, Mongoose/MongoDB, JWT
-- Build/Tooling: ESLint, TypeScript, Vite
+| Layer        | Technologies                                                         |
+| ------------ | -------------------------------------------------------------------- |
+| **Frontend** | React (Vite), TypeScript, Zustand, React Router, Axios, Tailwind CSS |
+| **Backend**  | Node.js (Express), TypeScript, Mongoose, JWT                         |
+| **Tooling**  | ESLint, TypeScript, Vite                                             |
+| **Database** | MongoDB                                                              |
+
 
 ## Repository Layout
 - `frontend/` – React app (Vite)
 - `backend/` – Express API (TypeScript)
+- `README.md`
 
 ## Quick Start (local)
-Prerequisites: Node 20+, npm, MongoDB running locally (or Docker if you prefer).
 
-1) Backend
-- Copy `.env` (see sample below) and install dependencies
-```
+1) Backend Setup
+
+```bash
 cd backend
-npm ci
+npm install
 # create .env with values shown below
 npm run dev
 ```
-The API defaults to `http://localhost:5000/api/v1`.
+Default API URL: `http://localhost:5000/api/v1`.
+
+
+- **Backend (`backend/.env`):**
+
+```ini
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/skill-swap
+JWT_SECRET=replace-with-strong-secret
+CORS_ORIGIN=http://localhost:5173     # frontend origin for dev
+
+```
+
 
 2) Frontend
-- Install dependencies and start Vite dev server
-```
+
+```bash
 cd frontend
-npm ci
-# create .env.local with VITE_API_URL=http://localhost:5000/api/v1
+npm install
+# create .env.local (or edit src/lib/api.ts)
 npm run dev
 ```
-Visit `http://localhost:5173`.
+Default frontend: `http://localhost:5173`.
 
-### Environment Variables
-Backend (`backend/.env`):
-- `PORT=5000`
-- `MONGODB_URI=mongodb://localhost:27017/skill-swap`
-- `JWT_SECRET=replace-with-strong-secret`
-- `CORS_ORIGIN=http://localhost:5173`  # frontend origin for dev
+- **Frontend API base URL:**
+- Hard-coded in `frontend/src/lib/api.ts` as `http://localhost:5000/api/v1`.
 
-Frontend API base URL
-- Currently hard-coded in `frontend/src/lib/api.ts` as `http://localhost:5000/api/v1`.
-- Optional: add `frontend/.env.local` with `VITE_API_URL=...` and update `api.ts` to use
-  `import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'` if you want it configurable.
+
 
 ## Application Overview
 ### Auth Flow
-- On login/register, API returns `{ token, user }`. The token is stored in `localStorage`.
+- User logs in or registers
+- API/backend returns `{ token, user }`.
+- The token is stored in `localStorage`.
 - Axios interceptor attaches `Authorization: Bearer <token>` for every request.
-- On app mount, `authStore.fetchUser()` calls `GET /auth/me` to hydrate the user.
+- On app mount/reload, `authStore.fetchUser()` calls `GET /auth/me` to hydrate/restore the user.
 - `PrivateRoute` waits when a token exists but the user state isn’t hydrated yet, avoiding a premature redirect to login.
 
 ### Data Model (simplified)
@@ -109,7 +124,51 @@ Most list endpoints return this shape:
 
 The frontend defines `Paginated<T>` and uses numbered pagination across Browse, Matches, and Requests. The page is synced with the URL (e.g., `/browse?page=2`).
 
-## API Reference (summary)
+## API Reference
+
+### Backend
+Base URL: `http://localhost:5000/api/v1`
+
+#### Auth Endpoints
+
+| Method | Endpoint         | Description                |
+| ------ | ---------------- | -------------------------- |
+| `POST` | `/auth/register` | Register a new user        |
+| `POST` | `/auth/login`    | Login and get `token`        |
+| `GET`  | `/auth/me`       | Get current logged-in user (requires `Authorization`) |
+
+
+#### User Endpoints
+
+| Method | Endpoint          | Description                                                                |
+| ------ | ----------------- | -------------------------------------------------------------------------- |
+| `GET`  | `/users`          | Browse users with filters (`search`, `category`, `skill`, `page`, `limit`) |
+- `search` is case‑insensitive (name and skills)
+- `category` and `skill` are matched case‑insensitively via regex
+| `GET`  | `/users/featured` | Get recent/featured users                                                  |
+| `GET`  | `/users/me`       | Get current user profile                                                   |
+| `PUT`  | `/users/me`       | Update profile (name, bio, avatar, skills)                                 |
+
+
+#### Match Endpoints
+
+| Method | Endpoint   | Description                                     |
+| ------ | ---------- | ----------------------------------------------- |
+| `GET`  | `/matches` | Get mutual matches for current user (supports `page`, `limit`) |
+
+
+#### Session (Swap Requests)
+
+| Method | Endpoint               | Description                                  |                      |
+| ------ | ---------------------- | -------------------------------------------- | -------------------- |
+| `POST` | `/sessions`            | Create a swap request                        |                      |
+| `GET`  | `/sessions/my`         | List my sessions (`type=incoming             | outgoing`, `status`) |
+| `PUT`  | `/sessions/:id/status` | Update status (`accepted`, `rejected`, etc.) |                      |
+
+
+
+
+
 Base URL: `http://localhost:5000/api/v1`
 
 Auth
