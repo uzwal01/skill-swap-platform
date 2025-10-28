@@ -201,11 +201,12 @@ Base URL: `http://localhost:5000/api/v1`
 
 
 ## Matching Logic (high level)
-- Server gets all users except current
-- A match exists if:
-  - They can teach a skill I want to learn, and
-  - They want to learn a skill I can teach
-- Result is paginated server‑side before returning to the client
+A match occurs when:
+- `User A` can teach a skill that `User B` wants
+  **and**
+- `User B` can teach a skill that `User A` wants
+
+Returned results are **paginated** and exclude the **logged-in** user.
 
 ## Development Notes
 - Case‑insensitive filters: `search`, `category`, and `skill` use regex with the `i` flag
@@ -213,18 +214,10 @@ Base URL: `http://localhost:5000/api/v1`
 - Profile edit uses simple skill chips with remove buttons
 - Requests tab shows in‑place actions; the full page (`/requests`) offers pagination and filters
 
-## Deployment (brief)
-- Recommended: containerized deploy with Docker and docker‑compose
-  - Backend (Node/Express) + MongoDB service
-  - Frontend built by Vite and served via Nginx
-- Set `CORS_ORIGIN` on the API and `VITE_API_URL` at build time for the frontend
-- Optionally place a reverse proxy (Caddy/Traefik) in front for TLS
-
-See `DEPLOYMENT.md` (to be added) for full Dockerfiles, Nginx config, and compose examples.
-
 ## Roadmap / Nice‑to‑Have
 - Messages tab (real‑time chat)
-- Notifications (badges/toasts), email verification, password reset
+- Notifications (badges/toasts)
+- Password reset + email verification
 - Avatar upload, duplicate/empty skill validation, input trimming
 - 401 handling via store logout (avoid hard reload)
 - DB indexes for search fields; optimize matching with aggregation
@@ -232,4 +225,4 @@ See `DEPLOYMENT.md` (to be added) for full Dockerfiles, Nginx config, and compos
 - CI: type‑check, lint, and tests
 
 ## License
-Private/intern project.
+Private/intern project. Developed by `Ujjwal Duwal`.
