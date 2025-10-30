@@ -28,7 +28,7 @@ export const getMatches = async (req: AuthRequest, res: Response) => {
                 )
             );
 
-            return canTeachYou && wantsToLearnFromYou;
+            return canTeachYou && wantsToLearnFromYou;    // Mutual match: both must be true to be a match
         });
 
         // Pagination

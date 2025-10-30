@@ -48,11 +48,13 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
   const { search, category, skill } = req.query;
 
   // Build filters using AND of independent OR clauses to avoid overwriting
-  const and: any[] = [];
+  const and: any[] = [];          // defining an array
 
   if (search) {
     const q = String(search);
+    // pushing into array 'and'
     and.push({
+      // Combining results with OR logic, where 'q = pattern object' and 'i = flag' for case-insensitive
       $or: [
         { name: new RegExp(q, 'i') },
         { 'skillsOffered.skill': new RegExp(q, 'i') },
@@ -82,6 +84,7 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
     });
   }
 
+  // for filtered and unfiltered queries
   const filters: any = and.length ? { $and: and } : {};
 
   // Pagination params with sane defaults and caps
