@@ -6,8 +6,9 @@ import authRoutes from './routes/v1/auth.routes';
 import userRoutes from './routes/v1/users.routes';
 import matchRoutes from './routes/v1/matches.routes';
 import sessionRoutes from './routes/v1/session.routes';
-
-
+import messageRoutes from './routes/v1/messages.routes';
+import http from 'http';
+import { initSocket } from './socket';
 
 
 dotenv.config();
@@ -37,15 +38,19 @@ app.use('/api/v1/auth', authRoutes);
 // users: /me
 app.use('/api/v1/users', userRoutes);
 
-
 // matches
 app.use('/api/v1/matches', matchRoutes);
 
 // Sessions: Create, Get and UpdateStatus
 app.use('/api/v1/sessions', sessionRoutes);
 
+// Messages
+app.use('/api/v1/messages', messageRoutes);
 
 
+
+const server = http.createServer(app);
+initSocket(server);
 
 
 
@@ -54,3 +59,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
+server.listen(PORT, () => console.log(`API on ${PORT}`));
