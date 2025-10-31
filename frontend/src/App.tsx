@@ -6,6 +6,7 @@ import PrivateRoute from './components/PrivateRoute'; // Protect private routes
 import Profile from './pages/Profile';
 import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
+import { useMessageStore } from './store/messageStore';
 import { BrowseSkills } from './pages/BrowseSkills';
 import ToastContainer from './components/ToastContainer';
 import Requests from './pages/Requests';
@@ -13,6 +14,9 @@ import Matches from './pages/Matches';
 
 const App = () => {
 const fetchUser = useAuthStore((state) => state.fetchUser);
+const user = useAuthStore((s) => s.user);
+const connect = useMessageStore((s) => s.connect);
+const loadConversations = useMessageStore((s) => s.loadConversations);
 
 useEffect(() => {
   fetchUser();
@@ -20,6 +24,16 @@ useEffect(() => {
   // Note: do not include fetchUser in deps; its reference may not be stable.
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
+
+// Connect socket globally once user is available so we can receive real-time messages/badges
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (token && user) {
+    connect(token);
+    loadConversations();
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [user]);
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -31,7 +45,8 @@ useEffect(() => {
         <Route path="/browse" element={<BrowseSkills />} />
 
         {/* Private Route */}
-        <Route path="/dashboard" element={<PrivateRoute><Profile /></PrivateRoute>} />        <Route path="/profile" element={
+        <Route path="/dashboard" element={<PrivateRoute><Profile /></PrivateRoute>} />        
+        <Route path="/profile" element={
           <PrivateRoute>
             <Profile />
           </PrivateRoute>

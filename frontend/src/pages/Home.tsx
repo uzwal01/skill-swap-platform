@@ -3,10 +3,12 @@ import { getFeaturedUsers } from "@/services/userService";
 import { User } from "@/types/User";
 import UserCard from "@/components/UserCard";
 import SessionRequestModel from "@/components/SessionRequestModel";
+import { ensureConversation } from "@/services/messageService";
 import { createSession } from "@/services/sessionService";
 import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
 import { useEffect, useState } from "react";
+import { isAxiosError } from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
 
@@ -53,6 +55,20 @@ const Home = () => {
                   if (!authUser) return navigate(`/login?next=${encodeURIComponent(location.pathname + location.search)}`);
                   setSelectedUser(clicked);
                   setRequestOpen(true);
+                }}
+                onMessage={async (clicked) => {
+                  if (!authUser) return navigate(`/login?next=${encodeURIComponent(location.pathname + location.search)}`);
+                  try {
+                    const conv = await ensureConversation(clicked._id);
+                    navigate(`/profile?tab=messages&conv=${conv._id}`);
+                  } catch (err) {
+                    const status = isAxiosError(err) ? err.response?.status : undefined;
+                    if (status === 403) {
+                      addToast({ type: 'error', message: 'Messaging is available after your swap is accepted.' });
+                    } else {
+                      addToast({ type: 'error', message: 'Unable to start conversation.' });
+                    }
+                  }
                 }}
                 className="transition-transform hover:-translate-y-1 hover:shadow-lg"
               />

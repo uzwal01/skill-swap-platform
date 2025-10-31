@@ -7,6 +7,9 @@ import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
 import { Match } from "@/types/Match";
 import { useEffect, useMemo, useState } from "react";
+import { ensureConversation } from "@/services/messageService";
+import { useNavigate } from "react-router-dom";
+import { isAxiosError } from "axios";
 
 const Matches: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -17,6 +20,7 @@ const Matches: React.FC = () => {
   const [selected, setSelected] = useState<Match | null>(null);
   const authUser = useAuthStore((s) => s.user);
   const addToast = useToastStore((s) => s.addToast);
+  const navigate = useNavigate();
 
   const pageNumbers = useMemo(() => {
     const total = result?.totalPages ?? 0;
@@ -53,6 +57,20 @@ const Matches: React.FC = () => {
                   if (!authUser) return;
                   setSelected(clicked);
                   setRequestOpen(true);
+                }}
+                onMessage={async (clicked) => {
+                  if (!authUser) return;
+                  try {
+                    const conv = await ensureConversation(clicked._id);
+                    navigate(`/profile?tab=messages&conv=${conv._id}`);
+                  } catch (err) {
+                    const status = isAxiosError(err) ? err.response?.status : undefined;
+                    if (status === 403) {
+                      addToast({ type: 'error', message: 'Messaging is available after your swap is accepted.' });
+                    } else {
+                      addToast({ type: 'error', message: 'Unable to start conversation.' });
+                    }
+                  }
                 }}
                 className=""
               />
@@ -106,4 +124,6 @@ const Matches: React.FC = () => {
 };
 
 export default Matches;
+
+
 

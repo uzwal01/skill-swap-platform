@@ -4,6 +4,7 @@ import FiltersBar from "@/components/FiltersBar";
 import UserCard from "@/components/UserCard";
 import { browseUsers, BrowseUsersQuery } from "@/services/userService";
 import { createSession } from "@/services/sessionService";
+import { ensureConversation } from "@/services/messageService";
 import { User } from "@/types/User";
 import { useEffect, useMemo, useState } from "react";
 import { Match } from "@/types/Match";
@@ -108,6 +109,20 @@ export const BrowseSkills = () => {
                     setSelected(u);
                     setRequestOpen(true);
                   }}
+                  onMessage={async (u) => {
+                    if (!authUser) return navigate(`/login?next=${encodeURIComponent(location.pathname + location.search)}`);
+                    try {
+                      const conv = await ensureConversation(u._id);
+                      navigate(`/profile?tab=messages&conv=${conv._id}`);
+                    } catch (err: any) {
+                      const status = err?.response?.status;
+                      if (status === 403) {
+                        addToast({ type: 'error', message: 'Messaging is available after your swap is accepted.' });
+                      } else {
+                        addToast({ type: 'error', message: 'Unable to start conversation.' });
+                      }
+                    }
+                  }}
                   className="transition-transform hover:-translate-y-1 hover:shadow-lg"
                 />
               ))}
@@ -172,3 +187,4 @@ export const BrowseSkills = () => {
     </div>
   );
 };
+

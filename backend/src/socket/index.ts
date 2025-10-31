@@ -6,8 +6,9 @@ import { Conversation } from '../models/Conversation';
 type JWTpayload = { userId: string };
 
 export function initSocket(httpServer: any) {
+    const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
     const io = new Server(httpServer, {
-        cors: { origin: process.env.CORS_ORIGIN, credentials: true }
+        cors: { origin: allowedOrigin, credentials: true }
     });
 
     io.use((socket, next) => {
@@ -51,14 +52,18 @@ export function initSocket(httpServer: any) {
 
             await Conversation.findByIdAndUpdate(conversationId, { lastMessageAt: new Date() });
 
-            io.to(`conv:${conversationId}`).emit('message:new', {
+            const messagePayload = {
                 _id: msg._id,
                 conversation: conversationId,
                 from: fromUserId,
                 to: toUserId,
                 text,
                 createdAt: msg.createdAt
-            });
+            };
+            // Emit to conversation room (open threads)
+            io.to(`conv:${conversationId}`).emit('message:new', messagePayload);
+            // Also notify recipient's personal room so badges can update even if thread not open
+            io.to(`user:${toUserId}`).emit('message:new', messagePayload);
         });
 
         socket.on('typing', ({ conversationId, isTyping }: { conversationId: string; isTyping: boolean; }) => {

@@ -10,6 +10,6 @@ const MessageSchema = new Schema({
     readAt: { type: Date },
 }, { timestamps: true });
 
-MessageSchema.index({ Conversation: 1, createdAt: -1 });
+MessageSchema.index({ conversation: 1, createdAt: -1 });
 
 export const Message = mongoose.model('Message', MessageSchema);

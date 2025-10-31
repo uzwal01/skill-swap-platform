@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/store/authStore";
+import { User } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const Navbar = () => {
@@ -9,11 +10,11 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
         <Link to="/" className="font-bold text-lg text-blue-600">SkillSwap</Link>
         <nav className="flex items-center gap-6">
-          <Link to="/browse" className="text-gray-700 hover:text-blue-600">Browse Skills</Link>
+          <Link to="/browse" className="text-gray-700 hover:text-blue-600 transition">Browse Skills</Link>
         </nav>
         {user ? (
           <div className="flex items-center gap-4">
-            <Link to="/profile" className="text-gray-700 hover:text-blue-600">My Profile</Link>
+            <Link to="/profile" className="text-gray-700 hover:text-blue-600 transition rounded-full bg-gray-200 p-1"><User className="w-5 h-5"/></Link>
             <button onClick={logout} className="bg-blue-500 text-white px-3 py-1.5 rounded-md hover:bg-blue-600">Log out</button>
           </div>
         ) : (

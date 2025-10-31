@@ -52,13 +52,9 @@ app.use('/api/v1/messages', messageRoutes);
 const server = http.createServer(app);
 initSocket(server);
 
-
-
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// Listen only once using the HTTP server (Express + Socket.IO)
+server.listen(PORT, () => {
+    console.log(`API and Socket listening on http://localhost:${PORT}`);
 });
-
-
-server.listen(PORT, () => console.log(`API on ${PORT}`));

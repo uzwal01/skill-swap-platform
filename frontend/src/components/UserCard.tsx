@@ -4,10 +4,11 @@ import { User } from "@/types/User";
 type Props = {
   user: User;
   onRequest?: (user: User) => void;
+  onMessage?: (user: User) => void;
   className: string;
 };
 
-const UserCard: React.FC<Props> = ({ user, onRequest, className }) => {
+const UserCard: React.FC<Props> = ({ user, onRequest, onMessage, className }) => {
   const initials = user.name
     .split(" ")
     .map((p) => p[0])
@@ -54,14 +55,24 @@ const UserCard: React.FC<Props> = ({ user, onRequest, className }) => {
             })}
           </span>
         </div>
-        {onRequest && (
-          <button
-            onClick={() => onRequest(user)}
-            className="rounded-md font-medium transition bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
-          >
-            Request Swap
-          </button>
-        )}
+        <div className="flex gap-2">
+          {onMessage && (
+            <button
+              onClick={() => onMessage(user)}
+              className="rounded-md border px-4 py-2 text-sm hover:bg-gray-50"
+            >
+              Message
+            </button>
+          )}
+          {onRequest && (
+            <button
+              onClick={() => onRequest(user)}
+              className="rounded-md font-medium transition bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+            >
+              Request Swap
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

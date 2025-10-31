@@ -1,6 +1,9 @@
 import { Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { Session } from "../models/Session";
+import { Conversation } from "../models/Conversation";
+import { Message } from "../models/Message";
+import mongoose from "mongoose";
 
 
 // Create New Sessions
@@ -130,11 +133,61 @@ export const updateSessionStatus = async (req: AuthRequest, res: Response) => {
         session.status = status;
         await session.save();
 
+        // Seed a first message when a request is accepted, carrying the original request details.
+        if (status === 'accepted') {
+            try {
+                const a = new mongoose.Types.ObjectId(session.fromUser as any);
+                const b = new mongoose.Types.ObjectId(session.toUser as any);
+                const pair = [a, b].sort();
+                let conv = await Conversation.findOne({ participants: { $all: pair, $size: 2 } });
+                if (!conv) {
+                    conv = await Conversation.create({ participants: pair });
+                }
+                const seed = [
+                    `Skill Request: I would like to learn ${session.toUserSkill} and can offer ${session.fromUserSkill} in exchange.`,
+                    session.message ? `Message: ${session.message}` : undefined,
+                    session.availability ? `Availability: ${session.availability}` : undefined,
+                    session.durationMinutes ? `Session Duration: ${session.durationMinutes} minutes` : undefined,
+                ].filter(Boolean).join(' ');
+                if (seed) {
+                    await Message.create({
+                        conversation: conv._id,
+                        from: session.fromUser as any,
+                        to: session.toUser as any,
+                        text: seed,
+                    });
+                    await Conversation.findByIdAndUpdate(conv._id, { lastMessageAt: new Date() });
+                }
+            } catch (e) {
+                // Non-fatal; seeding message failure should not block status update
+                console.error('Failed to seed acceptance message', e);
+            }
+        }
+
         res.json(session);
     } catch (err) {
         console.error('Update Session Error');
         res.status(500).json({ message: 'Internal Server Error' });
     } 
+};
+
+
+// Check if current user can message a given user (has an accepted session)
+export const canMessageWithUser = async (req: AuthRequest, res: Response) => {
+    try {
+        const me = req.user._id;
+        const other = req.params.userId;
+        const exists = await Session.findOne({
+            status: 'accepted',
+            $or: [
+                { fromUser: me, toUser: other },
+                { fromUser: other, toUser: me },
+            ],
+        }).lean();
+        res.json({ canMessage: !!exists });
+    } catch (err) {
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
 };
 
 

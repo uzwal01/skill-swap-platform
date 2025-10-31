@@ -1,4 +1,5 @@
-﻿import { Navbar } from "@/components/Navbar";
+import MessagesPane from '@/components/MessagesPane';
+import { Navbar } from "@/components/Navbar";
 import {
   getUserSessions,
   updateSessionStatus,
@@ -16,10 +17,13 @@ import { useAuthStore } from "@/store/authStore";
 import { Session } from "@/types/Session";
 import { User } from "@/types/User";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { isAxiosError } from "axios";
 import { useToastStore } from "@/store/toastStore";
 import { Match } from "@/types/Match";
 import { X } from "lucide-react";
+import { ensureConversation } from "@/services/messageService";
+import { useMessageStore } from "@/store/messageStore";
 
 const Profile: React.FC = () => {
   const setUser = useAuthStore((s) => s.setUser);
@@ -58,6 +62,9 @@ const Profile: React.FC = () => {
   const [requestOpen, setRequestOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const openConversation = useMessageStore((s) => s.openConversation);
+  const unreadTotal = useMessageStore((s) => s.conversations.reduce((sum, c) => sum + (c.unread ?? 0), 0));
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -142,6 +149,16 @@ const Profile: React.FC = () => {
       mounted = false;
     };
   }, [tab, addToast]);
+
+  // Handle deep-link to messages tab and specific conversation
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const t = params.get('tab');
+    const conv = params.get('conv');
+    if (t === 'messages') setTab('messages');
+    if (conv) openConversation(conv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
 
   if (loading) {
     return (
@@ -262,34 +279,25 @@ const Profile: React.FC = () => {
             <div className="rounded-t-xl border border-gray-100 bg-white shadow-sm px-6 pt-4 ">
               <div className="flex gap-6 text-sm">
                 <button
-                  className={`pb-2 hover:text-black transition ${
-                    tab === "matches"
-                      ? "border-b-2 border-black font-semibold"
-                      : "text-gray-500"
-                  }`}
+                  className={`pb-2 hover:text-black transition ${tab === "matches" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
                   onClick={() => setTab("matches")}
                 >
                   Matches
                 </button>
                 <button
-                  className={`pb-2 hover:text-black transition ${
-                    tab === "requests"
-                      ? "border-b-2 border-black font-semibold"
-                      : "text-gray-500"
-                  }`}
+                  className={`pb-2 hover:text-black transition ${tab === "requests" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
                   onClick={() => setTab("requests")}
                 >
                   Swap Requests
                 </button>
                 <button
-                  className={`pb-2 hover:text-black transition ${
-                    tab === "messages"
-                      ? "border-b-2 border-black font-semibold"
-                      : "text-gray-500"
-                  }`}
+                  className={`relative pb-2 hover:text-black transition ${tab === "messages" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
                   onClick={() => setTab("messages")}
                 >
                   Messages
+                  {unreadTotal > 0 && (
+                    <span className="absolute -top-2 -right-3 rounded-full bg-red-600 px-1.5 text-[10px] text-white">{unreadTotal}</span>
+                  )}
                 </button>
               </div>
             </div>
@@ -315,6 +323,21 @@ const Profile: React.FC = () => {
                           onRequest={(u) => {
                             setSelectedUser(u);
                             setRequestOpen(true);
+                          }}
+                          onMessage={async (u) => {
+                            try {
+                              const conv = await ensureConversation(u._id);
+                              setTab('messages');
+                              openConversation(conv._id);
+                              navigate(`/profile?tab=messages&conv=${conv._id}`, { replace: true });
+                            } catch (err) {
+                              const status = isAxiosError(err) ? err.response?.status : undefined;
+                              if (status === 403) {
+                                addToast({ type: 'error', message: 'Messaging is available after your swap is accepted.' });
+                              } else {
+                                addToast({ type: 'error', message: 'Unable to start conversation.' });
+                              }
+                            }
                           }}
                           className=""
                         />
@@ -454,7 +477,7 @@ const Profile: React.FC = () => {
               )}
 
               {tab === "messages" && (
-                <p className="text-sm text-gray-500">Messages coming soon.</p>
+                <MessagesPane />
               )}
             </div>
           </section>
@@ -699,3 +722,5 @@ const Profile: React.FC = () => {
 };
 
 export default Profile;
+
+
