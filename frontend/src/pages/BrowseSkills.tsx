@@ -12,6 +12,7 @@ import { createSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
 import { Paginated } from "@/types/Paginated";
+import { isAxiosError } from "axios";
 
 export const BrowseSkills = () => {
   const [filters, setFilters] = useState<BrowseUsersQuery>({});
@@ -114,8 +115,8 @@ export const BrowseSkills = () => {
                     try {
                       const conv = await ensureConversation(u._id);
                       navigate(`/profile?tab=messages&conv=${conv._id}`);
-                    } catch (err: any) {
-                      const status = err?.response?.status;
+                    } catch (err) {
+                      const status = isAxiosError(err) ? err.response?.status : undefined;
                       if (status === 403) {
                         addToast({ type: 'error', message: 'Messaging is available after your swap is accepted.' });
                       } else {

@@ -1,4 +1,4 @@
-import MessagesPane from '@/components/MessagesPane';
+﻿import MessagesPane from '@/components/MessagesPane';
 import { Navbar } from "@/components/Navbar";
 import {
   getUserSessions,
@@ -356,61 +356,9 @@ const Profile: React.FC = () => {
                       View all requests 
                     </button>
                   </div>
-                  <h3 className="mb-4 text-base font-semibold">
-                    Outgoing Requests
-                  </h3>
-                  {outgoing.length === 0 ? (
-                    <p className="text-sm text-gray-500">
-                      No outgoing requests.
-                    </p>
-                  ) : (
-                    <ul className="space-y-3 text-sm">
-                      {outgoing.map((s) => (
-                        <li
-                          key={s._id}
-                          className="rounded-lg border border-blue-200 shadow-sm p-3"
-                        >
-                          To{" "}
-                          <span className="font-medium">{s.toUser.name}</span> -{" "}
-                          {s.fromUserSkill} - {s.toUserSkill}
-                          <div className="text-xs text-gray-500">
-                            Status: {s.status}
-                            {s.availability ? " | " + s.availability : ""}
-                            {s.durationMinutes
-                              ? " | " + s.durationMinutes + " min"
-                              : ""}
-                          </div>
-                          {s.message && (
-                            <div className="mt-1 text-gray-700">
-                              "{s.message}"
-                            </div>
-                          )}
-                          <div className="mt-3 flex gap-2">
-                            {s.status === "pending" && (
-                              <button
-                                className="rounded bg-gray-600 px-3 py-1 text-white disabled:opacity-50"
-                                disabled={busyId === s._id}
-                                onClick={() => act(s._id, "cancelled")}
-                              >
-                                Cancel
-                              </button>
-                            )}
-                            {s.status === "accepted" && (
-                              <button
-                                className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
-                                disabled={busyId === s._id}
-                                onClick={() => act(s._id, "completed")}
-                              >
-                                Complete
-                              </button>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  
 
-                  <h3 className="mb-4 mt-8 text-base font-semibold">
+                  <h3 className="mb-4 text-base font-semibold">
                     Incoming Requests
                   </h3>
                   {incoming.length === 0 ? (
@@ -457,6 +405,60 @@ const Profile: React.FC = () => {
                                   Reject
                                 </button>
                               </>
+                            )}
+                            {s.status === "accepted" && (
+                              <button
+                                className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
+                                disabled={busyId === s._id}
+                                onClick={() => act(s._id, "completed")}
+                              >
+                                Complete
+                              </button>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <h3 className="mb-4 mt-8 text-base font-semibold">
+                    Outgoing Requests
+                  </h3>
+                  {outgoing.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      No outgoing requests.
+                    </p>
+                  ) : (
+                    <ul className="space-y-3 text-sm">
+                      {outgoing.map((s) => (
+                        <li
+                          key={s._id}
+                          className="rounded-lg border border-blue-200 shadow-sm p-3"
+                        >
+                          To{" "}
+                          <span className="font-medium">{s.toUser.name}</span> -{" "}
+                          {s.fromUserSkill} - {s.toUserSkill}
+                          <div className="text-xs text-gray-500">
+                            Status: {s.status}
+                            {s.availability ? " | " + s.availability : ""}
+                            {s.durationMinutes
+                              ? " | " + s.durationMinutes + " min"
+                              : ""}
+                          </div>
+                          {s.message && (
+                            <div className="mt-1 text-gray-700">
+                              "{s.message}"
+                            </div>
+                          )}
+                          <div className="mt-3 flex gap-2">
+                            {s.status === "pending" && (
+                              <button
+                                className="rounded bg-gray-600 px-3 py-1 text-white disabled:opacity-50"
+                                disabled={busyId === s._id}
+                                onClick={() => act(s._id, "cancelled")}
+                              >
+                                Cancel
+                              </button>
                             )}
                             {s.status === "accepted" && (
                               <button

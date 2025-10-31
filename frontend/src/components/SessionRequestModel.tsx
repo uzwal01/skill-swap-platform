@@ -71,7 +71,7 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
           <div>
             <label className="mb-1 block text-sm font-medium">What you can teach</label>
             <select
-              className="w-full rounded border p-2"
+              className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 focus:ring-blue-300 focus:outline-none w-full"
               value={fromUserSkill}
               onChange={(e) => setFromUserSkill(e.target.value)}
               required
@@ -95,7 +95,7 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
           <div>
             <label className="mb-1 block text-sm font-medium">What you want to learn</label>
             <select
-              className="w-full rounded border p-2"
+              className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 focus:ring-blue-300 focus:outline-none w-full"
               value={toUserSkill}
               onChange={(e) => setToUserSkill(e.target.value)}
               required
@@ -119,7 +119,7 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
           <div>
             <label className="mb-1 block text-sm font-medium">Your Message</label>
             <textarea
-              className="w-full rounded border p-2"
+              className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 focus:ring-blue-300 focus:outline-none w-full"
               rows={3}
               placeholder="I want to learn ..."
               value={message}
@@ -131,7 +131,7 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
             <div>
               <label className="mb-1 block text-sm font-medium">Availability</label>
               <select
-                className="w-full rounded border p-2"
+                className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 focus:ring-blue-300 focus:outline-none w-full"
                 value={availability ?? ''}
                 onChange={(e) => setAvailability(e.target.value ? (e.target.value as Availability) : undefined)}
               >
@@ -145,7 +145,7 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
             <div>
               <label className="mb-1 block text-sm font-medium">Session Duration</label>
               <select
-                className="w-full rounded border p-2"
+                className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 focus:ring-blue-300 focus:outline-none w-full"
                 value={durationMinutes ?? ''}
                 onChange={(e) => {
                   const v = e.target.value ? (Number(e.target.value) as Duration) : undefined;
@@ -165,7 +165,7 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
             <label className="mb-1 block text-sm font-medium">Schedule (optional)</label>
             <input
               type="datetime-local"
-              className="w-full rounded border p-2"
+              className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 focus:ring-blue-300 focus:outline-none w-full"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
             />
@@ -177,14 +177,14 @@ const SessionRequestModel: React.FC<Props> = ({ open, match, onClose, onSubmit }
             <button
               type="button"
               onClick={onClose}
-              className="rounded border px-3 py-1"
+              className="rounded border text-sm border-red-100 text-red-400 hover:bg-red-400 transition hover:text-white px-3 py-2"
               disabled={submitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
+              className="rounded text-sm bg-blue-500 hover:bg-blue-600 transition px-3 py-2 text-white disabled:opacity-50"
               disabled={submitting || teachOptions.length === 0 || learnOptions.length === 0}
             >
               {submitting ? "Requesting..." : "Request Session"}
