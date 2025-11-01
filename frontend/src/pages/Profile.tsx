@@ -181,6 +181,7 @@ const Profile: React.FC = () => {
   const incoming = profile
     ? sessions.filter((s) => s.toUser._id === profile._id)
     : [];
+  const pendingIncoming = incoming.filter((s) => s.status === "pending").length;
 
   // Full lists are shown in the tab (no preview limiting)
 
@@ -285,10 +286,13 @@ const Profile: React.FC = () => {
                   Matches
                 </button>
                 <button
-                  className={`pb-2 hover:text-black transition ${tab === "requests" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
+                  className={`relative pb-2 hover:text-black transition ${tab === "requests" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
                   onClick={() => setTab("requests")}
                 >
                   Swap Requests
+                  {pendingIncoming > 0 && (
+                    <span className="absolute -top-2 -right-3 rounded-full bg-red-600 px-1.5 text-[10px] text-white">{pendingIncoming}</span>
+                  )}
                 </button>
                 <button
                   className={`relative pb-2 hover:text-black transition ${tab === "messages" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
