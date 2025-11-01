@@ -72,10 +72,10 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
-        className="w-[95vw] h-[92vh] max-w-[95vw] sm:w-full sm:h-auto sm:max-w-3xl max-h-[92vh] sm:max-h-[80vh] rounded-sm sm:rounded-md bg-white p-4 shadow-xl"
+        className="w-screen h-[100dvh] sm:w-full sm:h-auto sm:max-w-3xl sm:max-h-[80vh] rounded-none sm:rounded-md bg-white p-4 shadow-xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-3 p-4 flex items-center border-b border-gray-100 shadow-sm rounded-t-lg justify-between">
+        <div className="mb-3 p-4 flex items-center border-b border-gray-100 shadow-sm rounded-t-lg justify-between shrink-0">
           <div className="text-base font-semibold flex gap-2 items-center justify-center">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-600">
               {initials}
@@ -91,7 +91,7 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
         </div>
         <div
           ref={scrollRef}
-          className="mb-3 h-[74vh] max-h-[74vh] sm:max-h-[52vh] sm:h-auto overflow-y-auto overflow-x-hidden border px-2 border-gray-100 shadow-sm"
+          className="mb-3 flex-1 overflow-y-auto overflow-x-hidden border px-2 border-gray-100 shadow-sm"
         >
           {messages.length === 0 ? (
             <p className="text-sm text-gray-500">No messages yet.</p>
@@ -135,7 +135,7 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
           )}
         </div>
         <form
-          className="flex gap-2 justify-center items-center"
+          className="flex gap-2 justify-center items-center shrink-0"
           onSubmit={(e) => {
             e.preventDefault();
             if (!text.trim() || !other) return;
@@ -162,3 +162,4 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
 };
 
 export default ConversationModal;
+
