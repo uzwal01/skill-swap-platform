@@ -6,6 +6,6 @@ const ConversationSchema = new Schema({
     lastMessageAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-ConversationSchema.index({ participants: 1 });
+ConversationSchema.index({ participants: 1 }, { unique: true });    // enforce only one conversation between each unique pair
 
 export const Conversation = mongoose.model('Conversation', ConversationSchema);

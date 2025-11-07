@@ -183,7 +183,7 @@ export const canMessageWithUser = async (req: AuthRequest, res: Response) => {
                 { fromUser: me, toUser: other },
                 { fromUser: other, toUser: me },
             ],
-        }).lean();
+        }).lean();   // lean() to reduce DB overhead
         res.json({ canMessage: !!exists });
     } catch (err) {
         res.status(500).json({ message: 'Internal Server Error' });
