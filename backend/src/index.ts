@@ -26,7 +26,7 @@ app.use(cors({
       return callback(null, true);
     }
 
-    console.error(`❌ Blocked by CORS: ${origin}`);
+    console.error(`Blocked by CORS: ${origin}`);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -34,7 +34,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.options('*', cors());
 
 app.use(express.json()); // Parses incoming JSON bodies
 
