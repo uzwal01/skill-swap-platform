@@ -45,7 +45,7 @@ useEffect(() => {
         <Route path="/browse" element={<BrowseSkills />} />
 
         {/* Private Route */}
-        <Route path="/dashboard" element={<PrivateRoute><Profile /></PrivateRoute>} />        
+       
         <Route path="/profile" element={
           <PrivateRoute>
             <Profile />
