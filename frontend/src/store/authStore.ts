@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { loginUser, registerUser, getCurrentuser } from '@/services/authService';  
 import { LoginFormData, RegisterPayload } from '@/types/FormData'; 
 import { User } from '@/types/User';
+import { isAxiosError } from 'axios';
 
 type AuthState = {
   user: User | null;  // Will hold the authenticated user data
@@ -29,7 +30,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', res.token);   // Save the token
       set({ user: res.user, error: null });  // Store the user data in global state
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Login failed";
+      const message = isAxiosError(err)
+        ? (err.response?.data?.message ?? 'Login failed')
+        : err instanceof Error
+        ? err.message
+        : 'Login failed';
       set({ error: message });
       throw new Error(message);
     } finally {
@@ -43,7 +48,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.setItem("token", res.token);
     set({ user: res.user, error: null });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Registration failed";
+    const message = isAxiosError(err)
+      ? (err.response?.data?.message ?? 'Registration failed')
+      : err instanceof Error
+      ? err.message
+      : 'Registration failed';
     set({ error: message });
     throw new Error(message);
   } finally {

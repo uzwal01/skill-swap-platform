@@ -27,7 +27,7 @@ const Login = () => {
         password: data.password.trim(),
       };
       await login(payload);
-      navigate(next || "/profile"); // Redirect on success
+      navigate(next || "/"); // Redirect on success
     } catch (err) {
       console.error(err);
     }

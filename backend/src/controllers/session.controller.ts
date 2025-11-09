@@ -4,6 +4,7 @@ import { Session } from "../models/Session";
 import { Conversation } from "../models/Conversation";
 import { Message } from "../models/Message";
 import mongoose from "mongoose";
+import { notifySessionCreated, notifySessionUpdated } from "../socket";
 
 
 // Create New Sessions
@@ -31,6 +32,12 @@ export const createSession = async (req: AuthRequest, res: Response) => {
             availability,
             durationMinutes,
         });
+
+        // Notify both users in real-time
+        try {
+            notifySessionCreated(String(req.user._id), session);
+            notifySessionCreated(String(toUser), session);
+        } catch {}
 
         res.status(201).json(session);
     } catch (err) {
@@ -163,6 +170,12 @@ export const updateSessionStatus = async (req: AuthRequest, res: Response) => {
                 console.error('Failed to seed acceptance message', e);
             }
         }
+
+        // Notify both users about the update
+        try {
+            notifySessionUpdated(String(session.fromUser), session);
+            notifySessionUpdated(String(session.toUser), session);
+        } catch {}
 
         res.json(session);
     } catch (err) {

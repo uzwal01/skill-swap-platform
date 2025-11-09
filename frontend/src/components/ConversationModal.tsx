@@ -72,6 +72,17 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
     );
   };
 
+  // Guard: avoid rendering thread until user is known, otherwise alignment (mine vs theirs) is wrong
+  if (!user) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+        <div className="rounded-md bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="text-sm text-gray-600">Loading conversation…</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
@@ -105,7 +116,8 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
             messages.map((m, i) => {
               const showDate =
                 i === 0 || !sameDay(messages[i - 1]?.createdAt, m.createdAt);
-              const mine = m.from === user?._id;
+              const myId = user._id; // User._id is typed as string
+              const mine = m.from === myId; // ChatMessage.from is also a string
               return (
                 <div key={m._id} className="mb-2">
                   {showDate && (

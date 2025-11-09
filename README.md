@@ -46,7 +46,7 @@ Default API URL: `http://localhost:5000/api/v1`.
 
 ```ini
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/skill-swap
+MONGODB_URI=mongodb://localhost:27017/skillswap
 JWT_SECRET=replace-with-strong-secret
 CORS_ORIGIN=http://localhost:5173     # frontend origin for dev
 
@@ -220,15 +220,37 @@ Returned results are **paginated** and exclude the **logged-in** user.
 - Profile edit uses simple skill chips with remove buttons
 - Requests tab shows in‑place actions; the full page (`/requests`) offers pagination and filters
 
-## Roadmap / Nice‑to‑Have
-- Messages tab (real‑time chat)
-- Notifications (badges/toasts)
-- Password reset + email verification
-- Avatar upload, duplicate/empty skill validation, input trimming
-- 401 handling via store logout (avoid hard reload)
-- DB indexes for search fields; optimize matching with aggregation
-- Seed script + demo data
-- CI: type‑check, lint, and tests
+## ScreenShots
+
+- Login Page
+![login](./frontend/public/screenshots/login.png)
+
+- Register Page
+![register](./frontend/public/screenshots/register.png)
+
+- Home Page
+![Home](./frontend/public/screenshots/home.png)
+
+- User Profile Page
+![profile](./frontend/public/screenshots/profile.png)
+
+- Swap Request form
+![swap-request-form](./frontend/public/screenshots/swap-request-form.png)
+
+- Sender's swap request tab
+![swap-request-sender](./frontend/public/screenshots/swap-request-sender.png)
+
+- Receiver's swap request tab
+![swap-request-receiver](./frontend/public/screenshots/swap-request-receiver.png)
+
+- Browse Skills
+![browse](./frontend/public/screenshots/browse.png)
+
+- Conversation tab
+![conversation](./frontend/public/screenshots/conversation.png)
+
+- Message inbox
+![inbox](./frontend/public/screenshots/inbox.png)
 
 ## License
 Private/intern project. Developed by `Ujjwal Duwal`.

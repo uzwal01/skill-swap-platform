@@ -5,6 +5,8 @@ import { Conversation } from "../models/Conversation";
 
 type JWTpayload = { userId: string };
 
+let ioRef: Server | null = null;
+
 export function initSocket(httpServer: any) {
   const io = new Server(httpServer, {
     cors: {
@@ -34,6 +36,8 @@ export function initSocket(httpServer: any) {
       next(new Error("Unauthorized"));
     }
   });
+
+  ioRef = io;
 
   io.on("connection", (socket) => {
     const userId = (socket as any).userId;
@@ -101,3 +105,14 @@ export function initSocket(httpServer: any) {
 
   return io;
 }
+
+// Helpers so REST controllers can notify clients
+export const notifySessionCreated = (userId: string, payload: any) => {
+  if (!ioRef) return;
+  ioRef.to(`user:${userId}`).emit("session:created", payload);
+};
+
+export const notifySessionUpdated = (userId: string, payload: any) => {
+  if (!ioRef) return;
+  ioRef.to(`user:${userId}`).emit("session:updated", payload);
+};

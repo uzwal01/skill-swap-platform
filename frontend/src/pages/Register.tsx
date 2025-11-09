@@ -5,6 +5,8 @@ import { registerSchema } from "@/schemas/registerSchema";
 import { useAuthStore } from "@/store/authStore";
 import { Link, useNavigate } from "react-router-dom";
 import z from "zod";
+import { useState } from "react";
+import { X } from "lucide-react";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 const Register = () => {
@@ -19,20 +21,36 @@ const Register = () => {
     resolver: zodResolver(registerSchema),
   });
 
-  // Helper function to parse skills input string into array of { category, skill }
-  const parseSkills = (input: string) => {
-    return input
-      .split(",")
-      .map((pair) => {
-        const [category, skill] = pair.split(":").map((s) => s.trim());
-        return { category, skill };
-      })
-      .filter((s) => s.category && s.skill); // remove empty entries
-  };
+  // Local state to build skills lists like in Edit Profile
+  const [offeredList, setOfferedList] = useState<
+    { category: string; skill: string }[]
+  >([]);
+  const [wantedList, setWantedList] = useState<
+    { category: string; skill: string }[]
+  >([]);
+  const [newOffered, setNewOffered] = useState<{ category: string; skill: string }>(
+    { category: "", skill: "" }
+  );
+  const [newWanted, setNewWanted] = useState<{ category: string; skill: string }>(
+    { category: "", skill: "" }
+  );
 
   const onSubmit = async (data: RegisterFormData) => {
-    const skillsOffered = parseSkills(data.skillsOfferedInput || "");
-    const skillsWanted = parseSkills(data.skillsWantedInput || "");
+    // Include any pending typed-but-not-added items
+    const pendingOffered = newOffered.category.trim() && newOffered.skill.trim()
+      ? [{ category: newOffered.category.trim(), skill: newOffered.skill.trim() }]
+      : [];
+    const pendingWanted = newWanted.category.trim() && newWanted.skill.trim()
+      ? [{ category: newWanted.category.trim(), skill: newWanted.skill.trim() }]
+      : [];
+
+    const normalize = (arr: { category: string; skill: string }[]) =>
+      arr
+        .map((s) => ({ category: s.category.trim(), skill: s.skill.trim() }))
+        .filter((s) => s.category.length > 0 && s.skill.length > 0);
+
+    const skillsOffered = normalize([...offeredList, ...pendingOffered]);
+    const skillsWanted = normalize([...wantedList, ...pendingWanted]);
 
     const payload: RegisterPayload = {
       name: data.name.trim(),
@@ -46,7 +64,7 @@ const Register = () => {
     try {
       // Cast to any temporarily until store types are updated to accept skills arrays
       await registerStore(payload);
-      navigate("/dashboard");
+      navigate("/profile");
     } catch (err) {
       console.error("Registration failed:", err);
     }
@@ -113,35 +131,131 @@ const Register = () => {
         {/* Skills Offered */}
         <div>
           <label className="block text-sm">Skills You Offer</label>
-          <input
-            type="text"
-            {...register("skillsOfferedInput")}
-            placeholder="Example: Programming:React, Design:Figma"
-            className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
-          />
-          <p className="text-gray-400 text-xs mt-1">
-            Enter as Category: Skill pairs, separated by commas.
-          </p>
-          {errors.skillsOfferedInput && (
-            <p className="text-red-500 text-xs">{errors.skillsOfferedInput.message}</p>
-          )}
+          <div className="mb-2 flex flex-wrap gap-2 mt-2">
+            {offeredList.length === 0 ? (
+              <span className="text-xs text-gray-400">None added</span>
+            ) : (
+              offeredList.map((s, i) => (
+                <span
+                  key={i}
+                  className="flex items-center gap-2 rounded bg-gray-100 px-2 py-0.5 text-xs"
+                >
+                  {s.category}: {s.skill}
+                  <button
+                    type="button"
+                    title="Remove"
+                    aria-label="Remove"
+                    onClick={() =>
+                      setOfferedList(offeredList.filter((_, idx) => idx !== i))
+                    }
+                    className="text-gray-500"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </span>
+              ))
+            )}
+          </div>
+          <div className="flex gap-2">
+            <input
+              className="flex-1 p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
+              placeholder="Add a skill you can teach..."
+              value={newOffered.skill}
+              onChange={(e) => setNewOffered({ ...newOffered, skill: e.target.value })}
+            />
+            <select
+              className="w-40 p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none"
+              value={newOffered.category}
+              onChange={(e) => setNewOffered({ ...newOffered, category: e.target.value })}
+            >
+              <option value="">Category</option>
+              <option>Design</option>
+              <option>Development</option>
+              <option>Music</option>
+              <option>Language</option>
+              <option>Business</option>
+              <option>Lifestyle</option>
+              <option>Photography</option>
+              <option>Education</option>
+            </select>
+            <button
+              type="button"
+              className="rounded bg-blue-500 hover:bg-blue-600 transition px-3 py-1 text-xs text-white mt-2"
+              onClick={() => {
+                if (newOffered.skill && newOffered.category) {
+                  setOfferedList([...offeredList, newOffered]);
+                  setNewOffered({ category: "", skill: "" });
+                }
+              }}
+            >
+              Add
+            </button>
+          </div>
         </div>
 
         {/* Skills Wanted */}
         <div>
           <label className="block text-sm">Skills You Want</label>
-          <input
-            type="text"
-            {...register("skillsWantedInput")}
-            placeholder="Example: Programming:Node.js, Design:Photoshop"
-            className="p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
-          />
-          <p className="text-gray-400 text-xs mt-1">
-            Enter as Category: Skill pairs, separated by commas.
-          </p>
-          {errors.skillsWantedInput && (
-            <p className="text-red-500 text-xs">{errors.skillsWantedInput.message}</p>
-          )}
+          <div className="mb-2 flex flex-wrap gap-2 mt-2">
+            {wantedList.length === 0 ? (
+              <span className="text-xs text-gray-400">None added</span>
+            ) : (
+              wantedList.map((s, i) => (
+                <span
+                  key={i}
+                  className="flex items-center gap-2 rounded bg-gray-100 px-2 py-0.5 text-xs"
+                >
+                  {s.category}: {s.skill}
+                  <button
+                    type="button"
+                    title="Remove"
+                    aria-label="Remove"
+                    onClick={() =>
+                      setWantedList(wantedList.filter((_, idx) => idx !== i))
+                    }
+                    className="text-gray-500"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </span>
+              ))
+            )}
+          </div>
+          <div className="flex gap-2">
+            <input
+              className="flex-1 p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none w-full"
+              placeholder="Add a skill you want to learn..."
+              value={newWanted.skill}
+              onChange={(e) => setNewWanted({ ...newWanted, skill: e.target.value })}
+            />
+            <select
+              className="w-40 p-2 border border-gray-300 text-sm rounded-md focus:ring-1 mt-2 focus:ring-blue-300 focus:outline-none"
+              value={newWanted.category}
+              onChange={(e) => setNewWanted({ ...newWanted, category: e.target.value })}
+            >
+              <option value="">Category</option>
+              <option>Design</option>
+              <option>Development</option>
+              <option>Music</option>
+              <option>Language</option>
+              <option>Business</option>
+              <option>Lifestyle</option>
+              <option>Photography</option>
+              <option>Education</option>
+            </select>
+            <button
+              type="button"
+              className="rounded bg-blue-500 hover:bg-blue-600 transition px-3 py-1 text-xs text-white mt-2"
+              onClick={() => {
+                if (newWanted.skill && newWanted.category) {
+                  setWantedList([...wantedList, newWanted]);
+                  setNewWanted({ category: "", skill: "" });
+                }
+              }}
+            >
+              Add
+            </button>
+          </div>
         </div>
 
         {/* Submit Button */}

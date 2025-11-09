@@ -23,6 +23,7 @@ import { useToastStore } from "@/store/toastStore";
 import { Match } from "@/types/Match";
 import { X } from "lucide-react";
 import { ensureConversation } from "@/services/messageService";
+import { getSocket } from "@/lib/socket";
 import { useMessageStore } from "@/store/messageStore";
 
 const Profile: React.FC = () => {
@@ -97,6 +98,29 @@ const Profile: React.FC = () => {
       }
     };
     init();
+
+    // Subscribe to session updates for real-time changes
+    const s = getSocket();
+    const refresh = async () => {
+      try {
+        const list = await getUserSessions();
+        setSessions(list);
+      } catch (err) {
+        console.error("Failed to refresh sessions", err);
+      }
+    };
+    if (s) {
+      s.off("session:created");
+      s.off("session:updated");
+      s.on("session:created", refresh);
+      s.on("session:updated", refresh);
+    }
+    return () => {
+      if (s) {
+        s.off("session:created", refresh);
+        s.off("session:updated", refresh);
+      }
+    };
   }, [setUser, addToast]);
 
   const canSave = useMemo(() => form.name.trim().length >= 2, [form.name]);
@@ -496,7 +520,9 @@ const Profile: React.FC = () => {
           match={selectedUser}
           onClose={() => setRequestOpen(false)}
           onSubmit={async (data) => {
-            await createSession(data);
+            const created = await createSession(data);
+            // Optimistically add to local list so sender sees it immediately
+            setSessions((prev) => [created, ...prev]);
             addToast({ type: "success", message: "Request sent" });
             setRequestOpen(false);
           }}
