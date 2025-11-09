@@ -33,6 +33,9 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
     openConversation(conversationId);
   }, [conversationId, openConversation]);
 
+  // const isTypingMap = useMessageStore((s) => s.isTyping);
+  // const isTyping = isTypingMap[conversationId];
+
   useEffect(() => {
     // Auto scroll to bottom when messages change
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -70,7 +73,10 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+    >
       <div
         className="w-screen h-[100dvh] sm:w-full sm:h-auto sm:max-w-3xl sm:max-h-[80vh] rounded-none sm:rounded-md bg-white p-4 shadow-xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
@@ -129,6 +135,11 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
                       </div>
                     </div>
                   </div>
+                  {/* {isTyping && (
+                    <div className="mb-2 text-xs text-gray-500 italic text-center">
+                      {other?.name || "User"} is typing...
+                    </div>
+                  )} */}
                 </div>
               );
             })
@@ -162,4 +173,3 @@ const ConversationModal: React.FC<Props> = ({ conversationId, onClose }) => {
 };
 
 export default ConversationModal;
-

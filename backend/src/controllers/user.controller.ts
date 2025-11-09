@@ -10,6 +10,7 @@ export const updateMe = async (req: AuthRequest, res: Response) => {
         const userId = req.user?._id;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
+        // list of editable fields, only fields from User Schema is included
         const allowed: (keyof IUser)[] = [
             "name",
             "bio",
