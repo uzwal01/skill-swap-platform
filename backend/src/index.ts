@@ -15,12 +15,17 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Frontend URL
-    credentials: true, // allows cookies / JWT to be sent
-  })
-);
+const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 
 app.use(express.json()); // Parses incoming JSON bodies
 
