@@ -226,6 +226,7 @@ Returned results are **paginated** and exclude the **logged-in** user.
 ![login](./frontend/public/screenshots/login.png)
 
 - Register Page
+
 ![register](./frontend/public/screenshots/register.png)
 
 - Home Page
