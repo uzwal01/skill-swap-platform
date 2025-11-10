@@ -22,6 +22,21 @@ export const createSession = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ message: 'Invalid duration' });
         }
 
+        // Disallow duplicate pending request from the same sender to the same recipient
+        const existing = await Session.findOne({
+            fromUser: req.user._id,
+            toUser,
+            status: 'pending',
+        }).select('_id createdAt').lean();
+
+        if (existing) {
+            return res.status(409).json({
+                message: 'You already have a pending request to this user.',
+                existingId: existing._id,
+                createdAt: existing.createdAt,
+            });
+        }
+
         const session = await Session.create({
             fromUser: req.user._id,
             toUser,

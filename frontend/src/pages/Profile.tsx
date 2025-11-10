@@ -6,7 +6,7 @@ import {
 } from "@/services/sessionService";
 import SessionRequestModel from "@/components/SessionRequestModel";
 import UserCard from "@/components/UserCard";
-import { createSession } from "@/services/sessionService";
+import { createSession, DuplicatePendingError } from "@/services/sessionService";
 import { getMutualMatches } from "@/services/matchService";
 import {
   getMyProfile,
@@ -520,11 +520,33 @@ const Profile: React.FC = () => {
           match={selectedUser}
           onClose={() => setRequestOpen(false)}
           onSubmit={async (data) => {
-            const created = await createSession(data);
-            // Optimistically add to local list so sender sees it immediately
-            setSessions((prev) => [created, ...prev]);
-            addToast({ type: "success", message: "Request sent" });
-            setRequestOpen(false);
+            try {
+              const created = await createSession(data);
+              setSessions((prev) => [created, ...prev]);
+              addToast({ type: "success", message: "Request sent" });
+              setRequestOpen(false);
+            } catch (e) {
+              if (e instanceof DuplicatePendingError && e.existingId) {
+                const ok = window.confirm(
+                  "You already have a pending request to this user. Cancel it and send a new one?"
+                );
+                if (ok) {
+                  try {
+                    await updateSessionStatus(e.existingId, "cancelled");
+                    const created = await createSession(data);
+                    setSessions((prev) => [created, ...prev]);
+                    addToast({ type: "success", message: "Previous request cancelled. New request sent." });
+                    setRequestOpen(false);
+                  } catch (err) {
+                    addToast({ type: "error", message: err instanceof Error ? err.message : "Failed to resend request" });
+                  }
+                } else {
+                  addToast({ type: "info", message: "Request not sent" });
+                }
+              } else {
+                addToast({ type: "error", message: e instanceof Error ? e.message : "Failed to create request" });
+              }
+            }
           }}
         />
       )}

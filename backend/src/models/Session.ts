@@ -11,6 +11,8 @@ export interface ISession extends Document {
     status: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'completed';
     scheduledAt?: Date;
     completedAt?: Date;
+    createdAt?: Date; // added because of timestamps
+    updatedAt?: Date; // added because of timestamps
 }
 
 
@@ -28,6 +30,13 @@ const sessionSchema = new Schema<ISession>(
         completedAt: { type: Date },
     },
     { timestamps: true }
+);
+
+// Prevent multiple pending requests from the same sender to the same recipient
+// Allows multiple requests when the earlier one is not pending anymore.
+sessionSchema.index(
+  { fromUser: 1, toUser: 1, status: 1 },
+  { unique: true, partialFilterExpression: { status: 'pending' } }
 );
 
 export const Session = mongoose.model<ISession>('Session', sessionSchema);

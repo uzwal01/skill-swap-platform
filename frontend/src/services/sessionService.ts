@@ -1,6 +1,7 @@
 import api from "@/lib/api.ts";
 import { Session } from "@/types/Session.ts";
 import { Paginated } from "@/types/Paginated";
+import { isAxiosError } from "axios";
 
 
 export type CreateSessionData = {
@@ -15,9 +16,35 @@ export type CreateSessionData = {
 
 
 // Create a new session
+export class DuplicatePendingError extends Error {
+    existingId: string;
+    createdAt?: string;
+    constructor(message: string, existingId: string, createdAt?: string) {
+        super(message);
+        this.name = 'DuplicatePendingError';
+        this.existingId = existingId;
+        this.createdAt = createdAt;
+    }
+}
+
 export const createSession = async (data: CreateSessionData): Promise<Session> => {
-    const response = await api.post('/sessions', data);
-    return response.data;
+    try {
+        const response = await api.post('/sessions', data);
+        return response.data as Session;
+    } catch (err: unknown) {
+        if (isAxiosError(err) && err.response?.status === 409) {
+            type DuplicateBody = { message?: string; existingId?: string; createdAt?: string };
+            const data: unknown = err.response.data;
+            const body: DuplicateBody = (typeof data === 'object' && data !== null)
+              ? (data as DuplicateBody)
+              : {};
+            const message = body.message ?? 'You already have a pending request to this user.';
+            const existingId = body.existingId ? String(body.existingId) : '';
+            const createdAt = body.createdAt;
+            throw new DuplicatePendingError(message, existingId, createdAt);
+        }
+        throw err instanceof Error ? err : new Error('Failed to create session');
+    }
 };
 
 // Get user sessions
